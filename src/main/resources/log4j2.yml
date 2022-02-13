@@ -1,0 +1,46 @@
+Configutation:
+  name: Default
+  status: warn
+
+  Properties:
+    Property:
+      name: log-path
+      value: "logs"
+
+  Appenders:
+    Console:
+      name: ConsoleLog
+      target: SYSTEM_OUT
+      PatternLayout:
+        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+    File:
+      name: FileLog
+      fileName: ${log-path}/logfile.log
+      PatternLayout:
+        pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+    RollingFile: # 조건에 따라
+      - name: RollingFileLog
+        fileName: ${log-path}/rollingfile.log
+        filePattern: "logs/archive/rollingfile.log.%d{yyyy-MM-dd-hh-mm}.gz"
+        PatternLayout:
+          pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+        Policies:
+          SizeBasedTriggeringPolicy:
+            size: 10 MB
+        DefaultRollOverStrategy:
+          max: 20
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: ConsoleLog
+        - ref: FileLog
+        - ref: RollingFileLog
+    Logger:
+      - name: com.mojh
+        additivity: false
+        level: debug
+        AppenderRef:
+          - ref: ConsoleLog
+          - ref: FileLog
+          - ref: RollingFileLog
