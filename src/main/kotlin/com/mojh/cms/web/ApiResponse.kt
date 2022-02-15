@@ -14,10 +14,10 @@ data class ApiResponse<out T> private constructor(
 
         fun <T> succeed(data: T?): ApiResponse<T> = ApiResponse(true, data, null)
 
-        fun failed(httpStatus: HttpStatus): ApiResponse<*> =
+        fun failed(httpStatus: HttpStatus) =
             ApiResponse(false, null, ErrorResponse(httpStatus.value(), null))
 
-        fun <E> failed(httpStatus: HttpStatus, message: E?): ApiResponse<*> =
+        fun <E> failed(httpStatus: HttpStatus, message: E?) =
             ApiResponse(false, null, ErrorResponse<E>(httpStatus.value(), message))
     }
 
