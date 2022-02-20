@@ -1,4 +1,4 @@
-package com.mojh.cms.web
+package com.mojh.cms.common
 
 import org.springframework.http.HttpStatus
 
