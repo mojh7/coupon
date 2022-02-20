@@ -1,7 +1,7 @@
 package com.mojh.cms.infra
 
 import com.mojh.cms.common.BaseTest
-import com.mojh.cms.config.RedissonConfig
+import com.mojh.cms.common.config.RedissonConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.redisson.api.RedissonClient
