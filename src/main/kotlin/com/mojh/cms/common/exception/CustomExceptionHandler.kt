@@ -1,4 +1,4 @@
-package com.mojh.cms.exception
+package com.mojh.cms.common.exception
 
 import com.mojh.cms.common.ApiResponse
 import org.apache.logging.log4j.LogManager

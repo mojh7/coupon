@@ -1,4 +1,4 @@
-package com.mojh.cms.exception
+package com.mojh.cms.common.exception
 
 open class ApplicationException(override val message: String?) : RuntimeException()
 
