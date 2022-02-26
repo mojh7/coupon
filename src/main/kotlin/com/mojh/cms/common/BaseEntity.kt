@@ -11,7 +11,7 @@ import javax.persistence.*
 abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val seq: Long? = null
+    val id: Long? = null
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
@@ -25,12 +25,12 @@ abstract class BaseEntity {
         if (this === other) return true
         if (other !is BaseEntity) return false
 
-        if (seq != other.seq) return false
+        if (id != other.id) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        return seq?.hashCode() ?: 0
+        return id?.hashCode() ?: 0
     }
 }
