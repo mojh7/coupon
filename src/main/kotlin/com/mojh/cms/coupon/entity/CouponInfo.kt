@@ -22,11 +22,15 @@ class CouponInfo(
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var status: CouponInfoStatus = CouponInfoStatus.CREATED,
+    var status: Status = Status.CREATED,
 
     @Column(nullable = false)
     var startAt: LocalDateTime,
 
     @Column(updatable = false)
     var endAt: LocalDateTime
-) : BaseEntity()
+) : BaseEntity() {
+    enum class Status {
+        CREATED, ENABLED, DISABLED
+    }
+}

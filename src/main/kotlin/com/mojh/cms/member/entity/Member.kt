@@ -16,5 +16,9 @@ class Member(
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var role: MemberRole
-): BaseEntity()
+    var role: Role
+): BaseEntity() {
+    enum class Role {
+        CUSTOMER, ADMIN
+    }
+}

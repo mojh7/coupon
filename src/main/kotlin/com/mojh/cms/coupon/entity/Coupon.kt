@@ -17,7 +17,11 @@ class Coupon(
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var status: CouponStatus = CouponStatus.ISSUED,
+    var status: Status = Status.ISSUED,
 
     var usedAt: LocalDateTime,
-) : BaseEntity()
+) : BaseEntity() {
+    enum class Status {
+        ISSUED, USED, EXPIRED
+    }
+}
