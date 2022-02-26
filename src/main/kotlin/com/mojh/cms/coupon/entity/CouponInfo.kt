@@ -8,14 +8,14 @@ import javax.persistence.*
 @Entity
 class CouponInfo(
     @ManyToOne(targetEntity = Member::class)
-    @JoinColumn(name = "member_seq", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     val admin: Member,
 
     @Column(length = 32, nullable = false)
     var name: String,
 
-    @Column(length = 64)
-    var description: String? = "",
+    @Column(length = 64, nullable = false)
+    var description: String = "",
 
     @Column(nullable = false)
     var maxCount: Int = 0,
@@ -25,14 +25,8 @@ class CouponInfo(
     var status: CouponInfoStatus = CouponInfoStatus.CREATED,
 
     @Column(nullable = false)
-    var issuableFromDt: LocalDateTime,
+    var startAt: LocalDateTime,
 
     @Column(updatable = false)
-    var issuableToDt: LocalDateTime,
-
-    @Column(nullable = false)
-    var validFromDt: LocalDateTime,
-
-    @Column(updatable = false)
-    var validToDt: LocalDateTime
+    var endAt: LocalDateTime
 ) : BaseEntity()

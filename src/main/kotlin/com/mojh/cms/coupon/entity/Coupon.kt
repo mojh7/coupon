@@ -8,11 +8,11 @@ import javax.persistence.*
 @Entity
 class Coupon(
     @ManyToOne
-    @JoinColumn(name = "member_seq", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     val customer: Member,
 
     @ManyToOne
-    @JoinColumn(name = "coupon_info_seq", nullable = false)
+    @JoinColumn(name = "coupon_info_id", nullable = false)
     val couponInfo: CouponInfo,
 
     @Column(nullable = false)
