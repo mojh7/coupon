@@ -1,6 +1,6 @@
-package com.mojh.cms.exception
+package com.mojh.cms.common.exception
 
-import com.mojh.cms.web.ApiResponse
+import com.mojh.cms.common.ApiResponse
 import org.apache.logging.log4j.LogManager
 import org.springframework.http.HttpStatus.*
 import org.springframework.validation.FieldError

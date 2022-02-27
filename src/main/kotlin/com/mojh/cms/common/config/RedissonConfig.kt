@@ -1,4 +1,4 @@
-package com.mojh.cms.config
+package com.mojh.cms.common.config
 
 import org.redisson.Redisson
 import org.redisson.api.RedissonClient
