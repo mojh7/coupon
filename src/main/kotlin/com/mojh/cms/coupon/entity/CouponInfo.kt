@@ -7,7 +7,7 @@ import javax.persistence.*
 
 @Entity
 class CouponInfo(
-    @ManyToOne(targetEntity = Member::class)
+    @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     val admin: Member,
 
