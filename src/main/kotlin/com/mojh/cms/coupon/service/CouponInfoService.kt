@@ -13,7 +13,7 @@ class CouponInfoService(
 
     @Transactional
     fun createCouponInfo(couponInfoRequest: CreateCouponInfoRequest, admin: Member) {
-        couponInfoRepository.save(couponInfoRequest.toCouponInfo(admin))
+        couponInfoRepository.save(couponInfoRequest.toEntity(admin))
     }
 
     /*

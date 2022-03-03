@@ -24,7 +24,7 @@ data class CreateCouponInfoRequest(
     @field:NotNull
     val endAt: LocalDateTime
 ) {
-    fun toCouponInfo(admin: Member) = CouponInfo(
+    fun toEntity(admin: Member) = CouponInfo(
         admin = admin,
         name = this.name,
         description = this.description,
