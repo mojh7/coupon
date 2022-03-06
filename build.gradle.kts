@@ -86,3 +86,14 @@ tasks.asciidoctor {
     project.property("snippetsDir")?.let { inputs.dir(it) }
     dependsOn(tasks.test)
 }
+
+noArg {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+}
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+}
