@@ -27,7 +27,7 @@ class Event(
         joinColumns = [JoinColumn(name = "event_id")],
         inverseJoinColumns = [JoinColumn(name = "coupon_info_id")]
     )
-    var couponInfo: List<CouponInfo>,
+    var couponInfo: MutableList<CouponInfo>,
 
     @Column(nullable = false)
     var startAt: LocalDateTime,
