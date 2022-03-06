@@ -3,7 +3,9 @@ package com.mojh.cms.coupon.service
 import com.mojh.cms.common.UnitTest
 import com.mojh.cms.coupon.dto.CreateCouponRequest
 import com.mojh.cms.coupon.repository.CouponRepository
+import com.mojh.cms.coupon.repository.MemberCouponRepository
 import com.mojh.cms.member.entity.Member
+import com.mojh.cms.member.repository.MemberRepository
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -15,6 +17,12 @@ import java.time.Month
 internal class MemberCouponServiceTest : UnitTest() {
     @MockK
     private lateinit var couponRepository: CouponRepository
+
+    @MockK
+    private lateinit var memberCouponRepository: MemberCouponRepository
+
+    @MockK
+    private lateinit var memberRepository: MemberRepository
 
     @InjectMockKs
     private lateinit var couponService: CouponService
@@ -41,14 +49,14 @@ internal class MemberCouponServiceTest : UnitTest() {
         @Test
         fun `성공`() {
             // given
-            val couponInfo = request.toEntity(seller);
-            every { couponRepository.save(couponInfo) } returns couponInfo
+            val coupon = request.toEntity(seller);
+            every { couponRepository.save(coupon) } returns coupon
 
             // when
             couponService.createCoupon(request, seller)
 
             // then
-            verify (exactly = 1) { couponRepository.save(couponInfo) }
+            verify (exactly = 1) { couponRepository.save(coupon) }
         }
     }
 }
