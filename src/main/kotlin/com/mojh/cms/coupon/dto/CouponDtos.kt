@@ -1,13 +1,13 @@
 package com.mojh.cms.coupon.dto
 
-import com.mojh.cms.coupon.entity.CouponInfo
+import com.mojh.cms.coupon.entity.Coupon
 import com.mojh.cms.member.entity.Member
 import java.time.LocalDateTime
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
-data class CreateCouponInfoRequest(
+data class CreateCouponRequest(
     @field:NotBlank
     @field:Size(max = 32)
     val name: String,
@@ -24,7 +24,7 @@ data class CreateCouponInfoRequest(
     @field:NotNull
     val endAt: LocalDateTime
 ) {
-    fun toEntity(admin: Member) = CouponInfo(
+    fun toEntity(admin: Member) = Coupon(
         admin = admin,
         name = this.name,
         description = this.description,
@@ -34,20 +34,20 @@ data class CreateCouponInfoRequest(
     )
 }
 
-data class CouponInfoResponse(
+data class CouponResponse(
     val name: String,
     val description: String,
     val maxCount: Int,
-    val status: CouponInfo.Status,
+    val status: Coupon.Status,
     val startAt: LocalDateTime,
     val endAt: LocalDateTime
 ) {
-    constructor(couponInfo: CouponInfo): this(
-        name = couponInfo.name,
-        description = couponInfo.description,
-        maxCount = couponInfo.maxCount,
-        status = couponInfo.status,
-        startAt = couponInfo.startAt,
-        endAt = couponInfo.endAt
+    constructor(coupon: Coupon): this(
+        name = coupon.name,
+        description = coupon.description,
+        maxCount = coupon.maxCount,
+        status = coupon.status,
+        startAt = coupon.startAt,
+        endAt = coupon.endAt
     )
 }

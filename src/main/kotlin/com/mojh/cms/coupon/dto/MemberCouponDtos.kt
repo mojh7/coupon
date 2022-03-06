@@ -12,7 +12,7 @@ data class MemberCouponResponse private constructor(
 ) {
     companion object {
         fun from(memberCoupon: MemberCoupon) =
-            memberCoupon.couponInfo.let {
+            memberCoupon.coupon.let {
                 MemberCouponResponse(it.name, it.description, memberCoupon.status, it.startAt, it.endAt)
             }
     }

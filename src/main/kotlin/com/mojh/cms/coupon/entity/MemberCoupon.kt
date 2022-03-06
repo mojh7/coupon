@@ -13,7 +13,7 @@ class MemberCoupon(
 
     @ManyToOne
     @JoinColumn(name = "coupon_info_id", nullable = false)
-    var couponInfo: CouponInfo,
+    var coupon: Coupon,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
