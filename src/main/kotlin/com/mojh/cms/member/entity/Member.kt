@@ -1,7 +1,7 @@
 package com.mojh.cms.member.entity
 
 import com.mojh.cms.common.BaseEntity
-import com.mojh.cms.coupon.entity.Coupon
+import com.mojh.cms.coupon.entity.MemberCoupon
 import javax.persistence.*
 
 @Entity
@@ -18,7 +18,7 @@ class Member(
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
     @JoinColumn(name = "member_id")
-    var coupons: MutableSet<Coupon>
+    var memberCoupons: MutableSet<MemberCoupon>
 ): BaseEntity() {
     enum class Role {
         CUSTOMER, ADMIN

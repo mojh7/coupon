@@ -1,7 +1,7 @@
 package com.mojh.cms.coupon.controller
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.coupon.dto.CouponResponse
+import com.mojh.cms.coupon.dto.MemberCouponResponse
 import com.mojh.cms.coupon.dto.CreateCouponInfoRequest
 import com.mojh.cms.coupon.service.CouponInfoService
 import com.mojh.cms.member.entity.Member
@@ -23,7 +23,7 @@ class CouponInfoController(
 
     @PostMapping("/coupons/{couponInfoId}/download")
 //    fun downloadCoupon(@PathVariable couponInfoId: Long, customer: Member): ApiResponse<CouponResponse> {
-    fun downloadCoupon(@PathVariable couponInfoId: Long): ApiResponse<CouponResponse> {
+    fun downloadCoupon(@PathVariable couponInfoId: Long): ApiResponse<MemberCouponResponse> {
         return ApiResponse.succeed(couponInfoService.downloadCoupon(couponInfoId))
     }
 }

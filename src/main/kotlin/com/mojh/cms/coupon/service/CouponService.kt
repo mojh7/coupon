@@ -1,11 +1,11 @@
 package com.mojh.cms.coupon.service
 
-import com.mojh.cms.coupon.repository.CouponRepository
+import com.mojh.cms.coupon.repository.MemberCouponRepository
 import org.springframework.stereotype.Service
 
 @Service
 class CouponService(
-    private val couponRepository: CouponRepository
+    private val memberCouponRepository: MemberCouponRepository
 ) {
     /* TODO: 쿠폰 서비스
     TODO : 사용가능한 쿠폰 조회

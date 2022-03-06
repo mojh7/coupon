@@ -1,12 +1,11 @@
 package com.mojh.cms.coupon.service
 
 import com.mojh.cms.common.exception.NotFoundException
-import com.mojh.cms.coupon.dto.CouponResponse
+import com.mojh.cms.coupon.dto.MemberCouponResponse
 import com.mojh.cms.coupon.dto.CreateCouponInfoRequest
-import com.mojh.cms.coupon.entity.Coupon
-import com.mojh.cms.coupon.entity.CouponInfo
+import com.mojh.cms.coupon.entity.MemberCoupon
 import com.mojh.cms.coupon.repository.CouponInfoRepository
-import com.mojh.cms.coupon.repository.CouponRepository
+import com.mojh.cms.coupon.repository.MemberCouponRepository
 import com.mojh.cms.member.entity.Member
 import com.mojh.cms.member.repository.MemberRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class CouponInfoService(
     private val couponInfoRepository: CouponInfoRepository,
-    private val couponRepository: CouponRepository,
+    private val memberCouponRepository: MemberCouponRepository,
     private val memberRepository: MemberRepository
 ) {
 
@@ -26,16 +25,16 @@ class CouponInfoService(
     }
 
     @Transactional
-    fun downloadCoupon(couponInfoId: Long): CouponResponse {
+    fun downloadCoupon(couponInfoId: Long): MemberCouponResponse {
         val couponInfo = couponInfoRepository.findByIdOrNull(couponInfoId) 
             ?: throw NotFoundException("해당 쿠폰 정보를 찾을 수 없습니다.")
 
         // security 추가하면 빠질 코드
         val customer = memberRepository.findByIdOrNull(1L) ?: throw NotFoundException("해당 member를 찾을 수 없습니다.")
 
-        val coupon = Coupon(customer, couponInfo)
-        couponRepository.save(coupon)
-        return CouponResponse.from(coupon)
+        val coupon = MemberCoupon(customer, couponInfo)
+        memberCouponRepository.save(coupon)
+        return MemberCouponResponse.from(coupon)
     }
 
     /*
