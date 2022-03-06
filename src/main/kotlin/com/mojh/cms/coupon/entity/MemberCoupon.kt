@@ -12,7 +12,7 @@ class MemberCoupon(
     val customer: Member,
 
     @ManyToOne
-    @JoinColumn(name = "coupon_info_id", nullable = false)
+    @JoinColumn(name = "coupon_id", nullable = false)
     var coupon: Coupon,
 
     @Column(nullable = false)
