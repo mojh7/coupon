@@ -12,7 +12,7 @@ class Event(
     @JoinColumn(name = "member_id", nullable = false)
     val seller: Member,
 
-    @Column(length = 32, nullable = false)
+    @Column(length = 64, nullable = false)
     var title: String,
 
     @Column(length = 255, nullable = false)
@@ -22,12 +22,9 @@ class Event(
     @Enumerated(EnumType.STRING)
     var status: Status = Status.CREATED,
 
-    @ManyToMany
-    @JoinTable(name = "event_coupon_info",
-        joinColumns = [JoinColumn(name = "event_id")],
-        inverseJoinColumns = [JoinColumn(name = "coupon_info_id")]
-    )
-    var coupon: MutableList<Coupon>,
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id")
+    var coupons: MutableSet<Coupon>,
 
     @Column(nullable = false)
     var startAt: LocalDateTime,
