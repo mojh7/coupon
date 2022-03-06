@@ -8,33 +8,50 @@ import javax.persistence.*
 
 @Entity
 class Coupon(
+    seller: Member,
+    event: Event? = null,
+    title: String,
+    description: String = "",
+    maxCount: Int,
+    status: Status = Status.CREATED,
+    startAt: LocalDateTime,
+    endAt: LocalDateTime
+) : BaseEntity() {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    val seller: Member,
+    var seller: Member = seller
+        protected set
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = true)
-    val event: Event? = null,
+    var event: Event? = event
+        protected set
 
     @Column(length = 64, nullable = false)
-    var title: String,
+    var title: String = title
+        protected set
 
     @Column(length = 64, nullable = false)
-    var description: String = "",
+    var description: String = description
+        protected set
 
     @Column(nullable = false)
-    var maxCount: Int = 0,
+    var maxCount: Int = maxCount
+        protected set
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var status: Status = Status.CREATED,
+    var status: Status = status
+        protected set
 
     @Column(nullable = false)
-    var startAt: LocalDateTime,
+    var startAt: LocalDateTime = startAt
+        protected set
 
     @Column(updatable = false)
-    var endAt: LocalDateTime
-) : BaseEntity() {
+    var endAt: LocalDateTime = endAt
+        protected set
+
     enum class Status {
         CREATED, ENABLED, DISABLED
     }
