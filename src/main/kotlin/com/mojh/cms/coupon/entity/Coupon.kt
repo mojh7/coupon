@@ -9,7 +9,7 @@ import javax.persistence.*
 class Coupon(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    val admin: Member,
+    val seller: Member,
 
     @Column(length = 64, nullable = false)
     var title: String,

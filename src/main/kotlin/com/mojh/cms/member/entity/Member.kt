@@ -22,6 +22,6 @@ class Member(
     var coupons: MutableSet<MemberCoupon> = TreeSet<MemberCoupon>()
 ): BaseEntity() {
     enum class Role {
-        CUSTOMER, ADMIN
+        CUSTOMER, SELLER
     }
 }

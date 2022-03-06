@@ -20,8 +20,8 @@ class CouponService(
 ) {
 
     @Transactional
-    fun createCoupon(couponRequest: CreateCouponRequest, admin: Member) {
-        couponRepository.save(couponRequest.toEntity(admin))
+    fun createCoupon(couponRequest: CreateCouponRequest, seller: Member) {
+        couponRepository.save(couponRequest.toEntity(seller))
     }
 
     @Transactional

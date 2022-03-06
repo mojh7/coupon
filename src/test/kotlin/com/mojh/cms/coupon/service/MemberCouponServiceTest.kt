@@ -19,11 +19,11 @@ internal class MemberCouponServiceTest : UnitTest() {
     @InjectMockKs
     private lateinit var couponService: CouponService
 
-    private lateinit var admin: Member;
+    private lateinit var seller: Member;
 
     @BeforeEach
     internal fun setUp() {
-        admin = Member("accountId", "pw", Member.Role.ADMIN)
+        seller = Member("accountId", "pw", Member.Role.SELLER)
     }
 
     @DisplayName("쿠폰 정보 생성")
@@ -41,11 +41,11 @@ internal class MemberCouponServiceTest : UnitTest() {
         @Test
         fun `성공`() {
             // given
-            val couponInfo = request.toEntity(admin);
+            val couponInfo = request.toEntity(seller);
             every { couponRepository.save(couponInfo) } returns couponInfo
 
             // when
-            couponService.createCoupon(request, admin)
+            couponService.createCoupon(request, seller)
 
             // then
             verify (exactly = 1) { couponRepository.save(couponInfo) }

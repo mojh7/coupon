@@ -25,7 +25,7 @@ data class CreateCouponRequest(
     val endAt: LocalDateTime
 ) {
     fun toEntity(admin: Member) = Coupon(
-        admin = admin,
+        seller = admin,
         title = this.title,
         description = this.description,
         maxCount = this.maxCount,

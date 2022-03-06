@@ -10,7 +10,7 @@ import javax.persistence.*
 class Event(
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
-    val admin: Member,
+    val seller: Member,
 
     @Column(length = 32, nullable = false)
     var title: String,
