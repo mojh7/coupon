@@ -7,19 +7,19 @@ import javax.persistence.*
 
 @Entity
 class Coupon(
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     val customer: Member,
 
     @ManyToOne
     @JoinColumn(name = "coupon_info_id", nullable = false)
-    val couponInfo: CouponInfo,
+    var couponInfo: CouponInfo,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     var status: Status = Status.ISSUED,
 
-    var usedAt: LocalDateTime,
+    var usedAt: LocalDateTime? = null,
 ) : BaseEntity() {
     enum class Status {
         ISSUED, USED, EXPIRED
