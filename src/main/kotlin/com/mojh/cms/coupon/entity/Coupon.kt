@@ -11,8 +11,8 @@ class Coupon(
     @JoinColumn(name = "member_id", nullable = false)
     val admin: Member,
 
-    @Column(length = 32, nullable = false)
-    var name: String,
+    @Column(length = 64, nullable = false)
+    var title: String,
 
     @Column(length = 64, nullable = false)
     var description: String = "",

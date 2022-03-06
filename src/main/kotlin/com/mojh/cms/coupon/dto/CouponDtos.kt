@@ -9,8 +9,8 @@ import javax.validation.constraints.Size
 
 data class CreateCouponRequest(
     @field:NotBlank
-    @field:Size(max = 32)
-    val name: String,
+    @field:Size(max = 64)
+    val title: String,
 
     @field:Size(max = 64)
     val description: String = "",
@@ -26,7 +26,7 @@ data class CreateCouponRequest(
 ) {
     fun toEntity(admin: Member) = Coupon(
         admin = admin,
-        name = this.name,
+        title = this.title,
         description = this.description,
         maxCount = this.maxCount,
         startAt = this.startAt,
@@ -35,7 +35,7 @@ data class CreateCouponRequest(
 }
 
 data class CouponResponse(
-    val name: String,
+    val title: String,
     val description: String,
     val maxCount: Int,
     val status: Coupon.Status,
@@ -43,7 +43,7 @@ data class CouponResponse(
     val endAt: LocalDateTime
 ) {
     constructor(coupon: Coupon): this(
-        name = coupon.name,
+        title = coupon.title,
         description = coupon.description,
         maxCount = coupon.maxCount,
         status = coupon.status,
