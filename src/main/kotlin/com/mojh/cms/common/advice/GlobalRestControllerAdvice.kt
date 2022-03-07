@@ -1,16 +1,14 @@
 package com.mojh.cms.common.advice
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.common.exception.BadRequestException
-import com.mojh.cms.common.exception.ConflictException
-import com.mojh.cms.common.exception.NotFoundException
+import com.mojh.cms.common.exception.CustomException
 import org.apache.logging.log4j.LogManager
 import org.springframework.http.HttpStatus.*
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.util.function.Consumer
 
@@ -22,41 +20,27 @@ class GlobalRestControllerAdvice {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    @ResponseStatus(BAD_REQUEST)
-    fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ApiResponse<*> {
+    fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ResponseEntity<ApiResponse<*>> {
         val errors: MutableMap<String, String?> = HashMap()
         exception.bindingResult.allErrors.forEach(Consumer {
                 error: ObjectError -> errors[(error as FieldError).field] = error.getDefaultMessage()
         })
         LOGGER.warn(exception.toString())
-        return ApiResponse.failed(BAD_REQUEST, errors)
+        return ResponseEntity.status(BAD_REQUEST)
+            .body(ApiResponse.failed(BAD_REQUEST, errors))
     }
 
-    @ExceptionHandler(BadRequestException::class)
-    @ResponseStatus(BAD_REQUEST)
-    fun handleBadRequestException(exception: BadRequestException): ApiResponse<*> {
+    @ExceptionHandler(CustomException::class)
+    fun handleCustomException(exception: CustomException): ResponseEntity<ApiResponse<*>> {
         LOGGER.warn(exception.toString())
-        return ApiResponse.failed(BAD_REQUEST, exception.message)
-    }
-
-    @ExceptionHandler(ConflictException::class)
-    @ResponseStatus(CONFLICT)
-    fun handleConflictException(exception: ConflictException): ApiResponse<*> {
-        LOGGER.warn(exception.toString())
-        return ApiResponse.failed(CONFLICT, exception.message)
-    }
-
-    @ExceptionHandler(NotFoundException::class)
-    @ResponseStatus(NOT_FOUND)
-    fun handleNotFoundException(exception: NotFoundException): ApiResponse<*> {
-        LOGGER.warn(exception.toString())
-        return ApiResponse.failed(NOT_FOUND, exception.message)
+        return ResponseEntity.status(exception.errorCode.status)
+            .body(ApiResponse.failed(exception.errorCode))
     }
 
     @ExceptionHandler(Exception::class)
-    @ResponseStatus(INTERNAL_SERVER_ERROR)
-    fun handleException(exception: Exception): ApiResponse<*> {
+    fun handleException(exception: Exception): ResponseEntity<ApiResponse<*>> {
         LOGGER.error(exception.toString())
-        return ApiResponse.failed(INTERNAL_SERVER_ERROR, "internal server error")
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+            .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "internal server error"))
     }
 }
