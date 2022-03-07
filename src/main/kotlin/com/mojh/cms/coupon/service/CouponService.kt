@@ -1,6 +1,8 @@
 package com.mojh.cms.coupon.service
 
-import com.mojh.cms.common.exception.NotFoundException
+import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.ErrorCode.COUPON_NOT_FOUND
+import com.mojh.cms.common.exception.ErrorCode.MEMBER_NOT_FOUND
 import com.mojh.cms.coupon.dto.MemberCouponResponse
 import com.mojh.cms.coupon.dto.CreateCouponRequest
 import com.mojh.cms.coupon.entity.MemberCoupon
@@ -27,10 +29,11 @@ class CouponService(
     @Transactional
     fun downloadCoupon(couponInfoId: Long): MemberCouponResponse {
         val couponInfo = couponRepository.findByIdOrNull(couponInfoId)
-            ?: throw NotFoundException("해당 쿠폰 정보를 찾을 수 없습니다.")
+            ?: throw CustomException(COUPON_NOT_FOUND)
 
         // security 추가하면 빠질 코드
-        val customer = memberRepository.findByIdOrNull(1L) ?: throw NotFoundException("해당 member를 찾을 수 없습니다.")
+        val customer = memberRepository.findByIdOrNull(1L)
+            ?: throw CustomException(MEMBER_NOT_FOUND)
 
         val coupon = MemberCoupon(customer, couponInfo)
         memberCouponRepository.save(coupon)
