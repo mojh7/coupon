@@ -1,6 +1,9 @@
-package com.mojh.cms.common.exception
+package com.mojh.cms.common.advice
 
 import com.mojh.cms.common.ApiResponse
+import com.mojh.cms.common.exception.BadRequestException
+import com.mojh.cms.common.exception.ConflictException
+import com.mojh.cms.common.exception.NotFoundException
 import org.apache.logging.log4j.LogManager
 import org.springframework.http.HttpStatus.*
 import org.springframework.validation.FieldError
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class CustomExceptionHandler {
+class GlobalRestControllerAdvice {
 
     companion object {
         private val LOGGER = LogManager.getLogger()
