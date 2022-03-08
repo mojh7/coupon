@@ -24,12 +24,12 @@ class JwtTokenUtil {
         Keys.hmacShaKeyFor(SECRET_KEY_RAW.toByteArray())
     }
 
-    fun createAccessToken(id: Long): String {
+    fun createAccessToken(accountId: String): String {
         val now = Date()
         return Jwts.builder()
             .setHeaderParam("typ", "JWT")
             .setSubject("access")
-            .claim("id", id)
+            .claim("id", accountId)
             .setIssuedAt(now)
             .setExpiration(Date(now.time + ACCESS_TOKEN_VALID_TIME))
             .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
@@ -46,13 +46,13 @@ class JwtTokenUtil {
             .compact()
     }
 
-    fun getIdFrom(accessToken: String): Long {
+    fun parseId(accessToken: String): String {
         return Jwts.parserBuilder()
             .requireSubject("access")
             .setSigningKey(SECRET_KEY)
             .build()
             .parseClaimsJws(accessToken)
-            .body["id"] as Long
+            .body["id"] as String
     }
 
     fun validateTokenStatus(token: String): TokenStatus {
