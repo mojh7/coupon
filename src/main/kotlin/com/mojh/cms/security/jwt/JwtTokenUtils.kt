@@ -1,4 +1,4 @@
-package com.mojh.cms.security
+package com.mojh.cms.security.jwt
 
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -10,7 +10,7 @@ import java.util.*
 import javax.crypto.SecretKey
 
 @Component
-class JwtTokenUtil {
+class JwtTokenUtils {
     @Value("\${jwt.secret-key}")
     private val SECRET_KEY_RAW: String = ""
 
