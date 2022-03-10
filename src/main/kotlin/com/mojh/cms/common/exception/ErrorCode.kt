@@ -10,7 +10,7 @@ enum class ErrorCode(
 ) {
     // common
 
-    // member
+    // member & auth
     MEMBER_NOT_FOUND(NOT_FOUND, "100", "해당 멤버를 찾을 수 없습니다"),
 
     // coupon
