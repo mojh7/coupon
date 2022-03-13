@@ -5,8 +5,8 @@ val PERMIT_ALL_GET_URI = arrayOf(
 )
 
 val PERMIT_ALL_POST_URI = arrayOf(
-    "/member/",
-    "/member/login",
+    "/member/signup",
+    "/auth/login",
 )
 
 const val BEARER_PREFIX = "Bearer "
