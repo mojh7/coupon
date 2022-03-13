@@ -17,7 +17,7 @@ data class SignupMemberRequest(
     @field:NotNull
     val role: Member.Role
 ) {
-    fun convertToMember(encodedPassword: String) = Member(
+    fun toMember(encodedPassword: String) = Member(
         accountId = this.accountId,
         password = encodedPassword,
         role = this.role

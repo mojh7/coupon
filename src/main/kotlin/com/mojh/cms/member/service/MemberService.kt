@@ -21,7 +21,7 @@ class MemberService(
         }
 
         passwordEncoder.encode(signupMemberRequest.password).let {
-            memberRepository.save(signupMemberRequest.convertToMember(it))
+            memberRepository.save(signupMemberRequest.toMember(it))
         }
     }
 }
