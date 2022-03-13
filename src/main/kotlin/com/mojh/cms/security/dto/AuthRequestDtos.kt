@@ -12,3 +12,8 @@ data class LoginRequest(
     @field:Size(min = 6, max = 20)
     val password: String,
 )
+
+data class ReissueTokenRequest(
+    @field:NotBlank
+    val refreshToken: String
+)

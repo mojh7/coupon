@@ -1,6 +1,9 @@
 package com.mojh.cms.security.jwt
 
+import com.mojh.cms.security.BEARER_PREFIX
+import com.sun.corba.se.impl.oa.poa.AOMEntry.VALID
 import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -8,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.*
 import javax.crypto.SecretKey
+
 
 @Component
 class JwtTokenUtils {
@@ -46,7 +50,7 @@ class JwtTokenUtils {
             .compact()
     }
 
-    fun parseId(accessToken: String): String {
+    fun parseAccountId(accessToken: String): String {
         return Jwts.parserBuilder()
             .requireSubject("access")
             .setSigningKey(SECRET_KEY)
@@ -67,6 +71,15 @@ class JwtTokenUtils {
                 is ExpiredJwtException -> TokenStatus.EXPIRED
                 else -> TokenStatus.INVALID
             }
+        }
+    }
+
+    fun extractTokenFrom(header: String?): String? {
+        return header?.run {
+            if(!startsWith(BEARER_PREFIX)) {
+                return null
+            }
+            substring(BEARER_PREFIX.length)
         }
     }
 }

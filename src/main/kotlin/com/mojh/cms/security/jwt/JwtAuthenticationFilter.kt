@@ -1,6 +1,5 @@
 package com.mojh.cms.security.jwt
 
-import com.mojh.cms.security.BEARER_PREFIX
 import com.mojh.cms.security.PERMIT_ALL_GET_URI
 import com.mojh.cms.security.PERMIT_ALL_POST_URI
 import com.mojh.cms.security.service.UserDetailsServiceImpl
@@ -29,8 +28,8 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        extractTokenFrom(request)?.let{
-            val userAdapter = userDetailsServiceImpl.loadUserByUsername(jwtTokenUtils.parseId(it))
+        jwtTokenUtils.extractTokenFrom(request.getHeader(AUTHORIZATION))?.let{
+            val userAdapter = userDetailsServiceImpl.loadUserByUsername(jwtTokenUtils.parseAccountId(it))
             SecurityContextHolder.getContext().authentication =
                 UsernamePasswordAuthenticationToken(userAdapter, null, userAdapter.authorities)
         }
@@ -45,15 +44,6 @@ class JwtAuthenticationFilter(
             HttpMethod.POST.toString() -> Arrays.stream(PERMIT_ALL_POST_URI)
                 .anyMatch { path -> pathMatcher.match(path, request.servletPath) }
             else -> false
-        }
-    }
-
-    private fun extractTokenFrom(request: HttpServletRequest): String? {
-        return request.getHeader(AUTHORIZATION)?.run {
-            if(!startsWith(BEARER_PREFIX)) {
-                return null
-            }
-            substring(BEARER_PREFIX.length)
         }
     }
 }

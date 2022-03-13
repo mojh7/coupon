@@ -1,18 +1,21 @@
 package com.mojh.cms.security.service
 
 import com.mojh.cms.common.exception.CustomException
-import com.mojh.cms.common.exception.ErrorCode.WRONG_ACCOUNT_ID
-import com.mojh.cms.common.exception.ErrorCode.PASSWORD_NOT_MATCHED
+import com.mojh.cms.common.exception.ErrorCode.*
 import com.mojh.cms.member.dto.LoginRequest
 import com.mojh.cms.member.repository.MemberRepository
 import com.mojh.cms.security.dto.TokensResponse
 import com.mojh.cms.security.jwt.JwtTokenUtils
+import com.mojh.cms.security.jwt.TokenStatus
 import org.redisson.api.RedissonClient
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.redis.core.ValueOperations
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.StringUtils
 import java.util.concurrent.TimeUnit
+
 
 @Service
 class AuthService(
@@ -41,5 +44,23 @@ class AuthService(
             .set(refreshToken, REFRESH_TOKEN_VALID_TIME, TimeUnit.MILLISECONDS)
 
         return TokensResponse(accessToken, refreshToken)
+    }
+
+    @Transactional(readOnly = true)
+    fun reissueAccessToken(accessToken: String?, refreshToken: String): String {
+        val accountId: String = accessToken?.let { jwtTokenUtils.parseAccountId(it) } ?: throw CustomException(INVALID_TOKEN)
+
+        when (jwtTokenUtils.validateTokenStatus(refreshToken)) {
+            TokenStatus.EXPIRED -> throw CustomException(EXPIRED_TOKEN)
+            TokenStatus.INVALID -> throw CustomException(INVALID_TOKEN)
+        }
+
+        redisson.getBucket<String?>(accountId).get()?.let {
+            if (it != refreshToken) {
+                throw CustomException(INVALID_TOKEN)
+            }
+        } ?: throw CustomException(LOGIN_REQUIRED)
+
+        return jwtTokenUtils.createAccessToken(accessToken)
     }
 }
