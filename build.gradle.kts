@@ -57,6 +57,11 @@ dependencies {
         exclude(group = "org.mockito")
     }
     testImplementation("com.ninja-squad:springmockk:3.0.1")
+
+    // kotest
+    testImplementation("io.kotest:kotest-runner-junit5:5.2.1") // for kotest framework
+    testImplementation("io.kotest:kotest-assertions-core:5.2.1") // for kotest core jvm assertions
+    testImplementation("io.kotest:kotest-property:5.2.1") // for kotest property test
 }
 
 tasks.withType<KotlinCompile> {
