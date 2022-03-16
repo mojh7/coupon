@@ -20,7 +20,7 @@ class AuthController(
         ApiResponse.succeed(authService.login(loginRequest))
 
     @PostMapping("/logout")
-    fun logout(@RequestHeader(AUTHORIZATION) accessToken: String,
+    fun logout(@RequestHeader(AUTHORIZATION) accessToken: String?,
                @Valid @RequestBody logoutRequest: LogoutRequest): ApiResponse<*> {
         authService.logout(accessToken, logoutRequest.refreshToken)
         return ApiResponse.succeed()

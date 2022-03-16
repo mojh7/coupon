@@ -44,10 +44,11 @@ class AuthService(
     }
 
     @Transactional
-    fun logout(accessToken: String, refreshToken: String) {
+    fun logout(accessToken: String?, refreshToken: String) {
         jwtTokenUtils.validateToken(refreshToken)
 
-        val accountId = jwtTokenUtils.parseAccountId(accessToken)
+        val accountId: String = accessToken?.let { jwtTokenUtils.parseAccountId(it) } ?: throw CustomException(INVALID_TOKEN)
+        jwtTokenUtils.verifyBlockedAccessToken(accessToken, accountId)
 
         // refresh token redis에서 제거
         val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
