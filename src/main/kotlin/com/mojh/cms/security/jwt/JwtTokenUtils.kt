@@ -1,15 +1,15 @@
 package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.exception.CustomException
-import com.mojh.cms.common.exception.ErrorCode
-import com.mojh.cms.common.exception.ErrorCode.EXPIRED_TOKEN
-import com.mojh.cms.common.exception.ErrorCode.INVALID_TOKEN
+import com.mojh.cms.common.exception.ErrorCode.*
+import com.mojh.cms.security.ACCESS_TOKEN_REDIS_KEY_PREFIX
 import com.mojh.cms.security.BEARER_PREFIX
 import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
+import org.redisson.api.RSetCache
+import org.redisson.api.RedissonClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.*
@@ -17,7 +17,9 @@ import javax.crypto.SecretKey
 
 
 @Component
-class JwtTokenUtils {
+class JwtTokenUtils(
+    private val redisson: RedissonClient
+) {
     @Value("\${jwt.secret-key}")
     private val SECRET_KEY_RAW: String = ""
 
@@ -101,6 +103,15 @@ class JwtTokenUtils {
         }
     }
 
+    /**
+     * 이미 로그아웃 처리되어 차단된 access token인지 확인
+     */
+    fun verifyBlockedAccessToken(accessToken: String, accountId: String) {
+        if(getAccessTokenRSetCache(accountId).contains(accessToken)) {
+            throw CustomException(ALREADY_LOGGED_OUT_MEMBER)
+        }
+    }
+
     fun extractTokenFrom(header: String?): String? {
         return header?.run {
             if(!startsWith(BEARER_PREFIX)) {
@@ -109,4 +120,10 @@ class JwtTokenUtils {
             substring(BEARER_PREFIX.length)
         }
     }
+
+    fun getAccessTokenRSetCache(accountId: String): RSetCache<String> =
+        redisson.getSetCache(ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId)
+
+    fun getRefreshTokenRSetCache(accountId: String): RSetCache<String> =
+        redisson.getSetCache(ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId)
 }

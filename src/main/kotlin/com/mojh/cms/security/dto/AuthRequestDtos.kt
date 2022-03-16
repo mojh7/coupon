@@ -13,6 +13,11 @@ data class LoginRequest(
     val password: String,
 )
 
+data class LogoutRequest(
+    @field:NotBlank
+    val refreshToken: String
+)
+
 data class ReissueTokenRequest(
     @field:NotBlank
     val refreshToken: String

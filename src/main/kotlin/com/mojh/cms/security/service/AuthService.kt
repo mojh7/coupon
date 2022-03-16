@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -21,7 +20,6 @@ import java.util.concurrent.TimeUnit
 class AuthService(
     private val memberRepository: MemberRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val redisson: RedissonClient,
     private val jwtTokenUtils: JwtTokenUtils
 ) {
     @Value("\${jwt.refresh-token-valid-time}")
@@ -39,13 +37,29 @@ class AuthService(
         val accessToken = jwtTokenUtils.createAccessToken(loginRequest.accountId)
         val refreshToken = jwtTokenUtils.createRefreshToken()
 
-        redisson.getSetCache<String>(REFRESH_TOKEN_REDIS_KEY_PREFIX + loginRequest.accountId)
+        jwtTokenUtils.getRefreshTokenRSetCache(loginRequest.accountId)
             .add(refreshToken, REFRESH_TOKEN_VALID_TIME, TimeUnit.MILLISECONDS)
 
         return TokensResponse(accessToken, refreshToken)
     }
 
-    
+    @Transactional
+    fun logout(accessToken: String, refreshToken: String) {
+        jwtTokenUtils.validateToken(refreshToken)
+
+        val accountId = jwtTokenUtils.parseAccountId(accessToken)
+
+        // refresh token redis에서 제거
+        val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
+        if (refreshTokenSet.contains(refreshToken)) {
+            throw CustomException(ALREADY_LOGGED_OUT_MEMBER)
+        }
+        refreshTokenSet.remove(refreshToken)
+
+        // access token blacklist 등록
+        jwtTokenUtils.getAccessTokenRSetCache(accountId)
+            .add(accessToken, jwtTokenUtils.getRemainingExpirationTime(accessToken), TimeUnit.MILLISECONDS)
+    }
 
     @Transactional(readOnly = true)
     fun reissueAccessToken(accessToken: String?, refreshToken: String): String {
@@ -53,9 +67,9 @@ class AuthService(
 
         jwtTokenUtils.validateToken(refreshToken)
 
-        val refreshTokenSet = redisson.getSetCache<String>(REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId)
+        val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
         if (!refreshTokenSet.contains(refreshToken)) {
-            throw CustomException(LOGIN_REQUIRED)
+            throw CustomException(NEED_TO_LOGIN_AGAIN)
         }
 
         return jwtTokenUtils.createAccessToken(accountId)

@@ -29,7 +29,10 @@ class JwtAuthenticationFilter(
         filterChain: FilterChain
     ) {
         jwtTokenUtils.extractTokenFrom(request.getHeader(AUTHORIZATION))?.let{
-            val userAdapter = userDetailsServiceImpl.loadUserByUsername(jwtTokenUtils.parseAccountId(it))
+            val accountId = jwtTokenUtils.parseAccountId(it)
+            jwtTokenUtils.verifyBlockedAccessToken(it, accountId)
+
+            val userAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
             SecurityContextHolder.getContext().authentication =
                 UsernamePasswordAuthenticationToken(userAdapter, null, userAdapter.authorities)
         }
