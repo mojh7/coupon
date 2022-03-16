@@ -1,7 +1,10 @@
 package com.mojh.cms.security.jwt
 
+import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.ErrorCode
+import com.mojh.cms.common.exception.ErrorCode.EXPIRED_TOKEN
+import com.mojh.cms.common.exception.ErrorCode.INVALID_TOKEN
 import com.mojh.cms.security.BEARER_PREFIX
-import com.sun.corba.se.impl.oa.poa.AOMEntry.VALID
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
@@ -50,27 +53,51 @@ class JwtTokenUtils {
             .compact()
     }
 
+    /**
+     * access token 내의 account id 반환(만료된 토큰이라도 반환)
+     * access token만 가능
+     */
     fun parseAccountId(accessToken: String): String {
-        return Jwts.parserBuilder()
-            .requireSubject("access")
-            .setSigningKey(SECRET_KEY)
-            .build()
-            .parseClaimsJws(accessToken)
-            .body["id"] as String
+        return try {
+            Jwts.parserBuilder()
+                .requireSubject("access")
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(accessToken)
+                .body["id"] as String
+        } catch (ex: ExpiredJwtException) {
+            // 만료된 AccessToken 재발급에 필요한 로직이라 만료 됐어도 parsing
+            try {
+                ex.claims["id"] as String
+            } catch (ex: Exception) {
+                // Claims안의 값이 null이거나 이상한 값일 수도 있어서 한 번 더 예외 처리
+                throw CustomException(INVALID_TOKEN, ex)
+            }
+        } catch (ex: Exception) {
+            throw CustomException(INVALID_TOKEN, ex)
+        }
     }
 
-    fun validateTokenStatus(token: String): TokenStatus {
-        return try {
+    /**
+     * 남은 만료 시간 milliseconds 단위로 반환
+     */
+    fun getRemainingExpirationTime(token: String) =
+        Jwts.parserBuilder()
+            .setSigningKey(SECRET_KEY)
+            .build()
+            .parseClaimsJws(token)
+            .body.expiration.time - Date().time
+
+    fun validateToken(token: String) {
+        try {
             Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
-            TokenStatus.VALID
         } catch (ex: Exception) {
-            when(ex) {
-                is ExpiredJwtException -> TokenStatus.EXPIRED
-                else -> TokenStatus.INVALID
-            }
+            throw CustomException(INVALID_TOKEN, ex)
+        } catch (ex: ExpiredJwtException) {
+            throw CustomException(EXPIRED_TOKEN, ex)
         }
     }
 
