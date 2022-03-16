@@ -6,7 +6,6 @@ import com.mojh.cms.member.repository.MemberRepository
 import com.mojh.cms.security.MemberAdapter
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Service
 
 @Service
