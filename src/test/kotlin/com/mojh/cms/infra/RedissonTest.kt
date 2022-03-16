@@ -8,8 +8,9 @@ import org.redisson.api.RedissonClient
 import org.springframework.boot.test.context.SpringBootTest
 import java.util.concurrent.TimeUnit
 
+@BaseTest
 @SpringBootTest(classes = [RedissonConfig::class])
-class RedissonTest(private val redisson: RedissonClient) : BaseTest() {
+class RedissonTest(private val redisson: RedissonClient) {
 
     @Test
     fun `레디스 데이터 만료 전 조회 성공`() {

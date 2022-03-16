@@ -5,5 +5,6 @@ import org.springframework.test.context.TestConstructor
 
 @ActiveProfiles("test")
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
-abstract class BaseTest {
-}
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class BaseTest
