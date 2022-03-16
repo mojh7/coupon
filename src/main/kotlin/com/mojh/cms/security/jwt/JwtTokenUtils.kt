@@ -4,6 +4,7 @@ import com.mojh.cms.common.exception.CustomException
 import com.mojh.cms.common.exception.ErrorCode.*
 import com.mojh.cms.security.ACCESS_TOKEN_REDIS_KEY_PREFIX
 import com.mojh.cms.security.BEARER_PREFIX
+import com.mojh.cms.security.REFRESH_TOKEN_REDIS_KEY_PREFIX
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -125,5 +126,5 @@ class JwtTokenUtils(
         redisson.getSetCache(ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId)
 
     fun getRefreshTokenRSetCache(accountId: String): RSetCache<String> =
-        redisson.getSetCache(ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId)
+        redisson.getSetCache(REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId)
 }
