@@ -1,7 +1,8 @@
 package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.exception.CustomException
-import com.mojh.cms.common.exception.ErrorCode.*
+import com.mojh.cms.common.exception.ErrorCode.EXPIRED_TOKEN
+import com.mojh.cms.common.exception.ErrorCode.INVALID_TOKEN
 import com.mojh.cms.security.ACCESS_TOKEN_REDIS_KEY_PREFIX
 import com.mojh.cms.security.BEARER_PREFIX
 import com.mojh.cms.security.REFRESH_TOKEN_REDIS_KEY_PREFIX
@@ -85,11 +86,18 @@ class JwtTokenUtils(
      * 남은 만료 시간 milliseconds 단위로 반환
      */
     fun getRemainingExpirationTime(token: String) =
-        Jwts.parserBuilder()
-            .setSigningKey(SECRET_KEY)
-            .build()
-            .parseClaimsJws(token)
-            .body.expiration.time - Date().time
+        try {
+            Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .body.expiration.time - Date().time
+        } catch (ex: Exception) {
+            when (ex) {
+                is ExpiredJwtException -> throw CustomException(EXPIRED_TOKEN, ex)
+                else -> throw CustomException(INVALID_TOKEN, ex)
+            }
+        }
 
     fun validateToken(token: String) =
         try {
@@ -99,23 +107,25 @@ class JwtTokenUtils(
                 .parseClaimsJws(token)
             true
         } catch (ex: Exception) {
-            throw CustomException(INVALID_TOKEN, ex)
-        } catch (ex: ExpiredJwtException) {
-            throw CustomException(EXPIRED_TOKEN, ex)
+            when (ex) {
+                is ExpiredJwtException -> throw CustomException(EXPIRED_TOKEN, ex)
+                else -> throw CustomException(INVALID_TOKEN, ex)
+            }
         }
 
     /**
      * 이미 로그아웃 처리되어 차단된 access token인지 확인
      */
-    fun verifyBlockedAccessToken(accessToken: String, accountId: String) {
-        if(getAccessTokenRSetCache(accountId).contains(accessToken)) {
-            throw CustomException(ALREADY_LOGGED_OUT_MEMBER)
+    fun isBlockedAccessToken(accessToken: String, accountId: String): Boolean {
+        if (getAccessTokenRSetCache(accountId).contains(accessToken)) {
+            return true
         }
+        return false
     }
 
     fun extractTokenFrom(header: String?): String? {
         return header?.run {
-            if(!startsWith(BEARER_PREFIX)) {
+            if (!startsWith(BEARER_PREFIX)) {
                 return null
             }
             substring(BEARER_PREFIX.length)

@@ -45,7 +45,7 @@ class AuthService(
         jwtTokenUtils.validateToken(refreshToken)
 
         val accountId: String = accessToken?.let { jwtTokenUtils.parseAccountId(it) } ?: throw CustomException(INVALID_TOKEN)
-        jwtTokenUtils.verifyBlockedAccessToken(accessToken, accountId)
+        jwtTokenUtils.isBlockedAccessToken(accessToken, accountId)
 
         // refresh token redis에서 제거
         val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)

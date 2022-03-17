@@ -1,5 +1,7 @@
 package com.mojh.cms.security.jwt
 
+import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.security.PERMIT_ALL_GET_URI
 import com.mojh.cms.security.PERMIT_ALL_POST_URI
 import com.mojh.cms.security.service.UserDetailsServiceImpl
@@ -30,7 +32,9 @@ class JwtAuthenticationFilter(
     ) {
         jwtTokenUtils.extractTokenFrom(request.getHeader(AUTHORIZATION))?.let{
             val accountId = jwtTokenUtils.parseAccountId(it)
-            jwtTokenUtils.verifyBlockedAccessToken(it, accountId)
+            if (jwtTokenUtils.isBlockedAccessToken(it, accountId)) {
+                throw CustomException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
+            }
 
             val userAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
             SecurityContextHolder.getContext().authentication =
