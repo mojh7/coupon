@@ -1,9 +1,9 @@
 package com.mojh.cms.common.config
 
-import com.mojh.cms.security.jwt.JwtAuthenticationEntryPoint
-import com.mojh.cms.security.jwt.JwtAuthenticationFilter
 import com.mojh.cms.security.PERMIT_ALL_GET_URI
 import com.mojh.cms.security.PERMIT_ALL_POST_URI
+import com.mojh.cms.security.jwt.JwtAuthenticationEntryPoint
+import com.mojh.cms.security.jwt.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity

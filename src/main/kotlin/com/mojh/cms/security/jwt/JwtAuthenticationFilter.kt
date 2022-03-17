@@ -39,14 +39,12 @@ class JwtAuthenticationFilter(
                     throw CustomException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
                 }
 
-                val userAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
+                val memberAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
                 SecurityContextHolder.getContext().authentication =
-                    UsernamePasswordAuthenticationToken(userAdapter, null, userAdapter.authorities)
+                    UsernamePasswordAuthenticationToken(memberAdapter, null, memberAdapter.authorities)
             }
         } catch (ex: CustomException) {
             request.setAttribute(AUTH_EXCEPTION_INFO, ex);
-        } catch (ex: Exception) {
-            throw ex
         }
 
         filterChain.doFilter(request, response)
