@@ -91,18 +91,18 @@ class JwtTokenUtils(
             .parseClaimsJws(token)
             .body.expiration.time - Date().time
 
-    fun validateToken(token: String) {
+    fun validateToken(token: String) =
         try {
             Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
+            true
         } catch (ex: Exception) {
             throw CustomException(INVALID_TOKEN, ex)
         } catch (ex: ExpiredJwtException) {
             throw CustomException(EXPIRED_TOKEN, ex)
         }
-    }
 
     /**
      * 이미 로그아웃 처리되어 차단된 access token인지 확인

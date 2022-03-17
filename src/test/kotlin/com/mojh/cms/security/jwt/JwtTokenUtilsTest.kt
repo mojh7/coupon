@@ -2,43 +2,37 @@ package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.BaseTest
 import com.mojh.cms.common.config.RedissonConfig
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldStartWith
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.util.StringUtils
 
 @BaseTest
 @SpringBootTest(classes = [JwtTokenUtils::class, RedissonConfig::class])
-internal class JwtTokenUtilsTest(private val jwtTokenUtils: JwtTokenUtils) {
+@ContextConfiguration
+internal class JwtTokenUtilsTest(private val jwtTokenUtils: JwtTokenUtils) : FunSpec() {
 
-    private lateinit var accountId: String;
-
-    @BeforeEach
-    internal fun setUp() {
-        accountId = "testAccountId"
+    companion object {
+        private val accountId = "testAccountId";
+        private val jwtHeaderBase64 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.";
     }
 
-    @Test
-    fun `유효한 access token 생성`() {
-        //given
+    init {
 
-        //when
-        val token = jwtTokenUtils.createAccessToken(accountId)
+        test("access token 생성 성공시 유효한 토큰 획득") {
+            val actualAccessToken = jwtTokenUtils.createAccessToken(accountId)
 
-        //then
-        assertThat(token).isNotBlank
-        jwtTokenUtils.validateToken(token)
-    }
+            StringUtils.containsWhitespace(actualAccessToken) shouldBe false
+            actualAccessToken shouldStartWith jwtHeaderBase64
+        }
 
-    @Test
-    fun `유효한 refresh token 생성`() {
-        //given
+        test("refresh token 생성 성공시 유효한 토큰 획득") {
+            val actualRefreshToken = jwtTokenUtils.createRefreshToken()
 
-        //when
-        val token = jwtTokenUtils.createRefreshToken()
-
-        //then
-        assertThat(token).isNotBlank
-        jwtTokenUtils.validateToken(token)
+            StringUtils.containsWhitespace(actualRefreshToken) shouldBe false
+            actualRefreshToken shouldStartWith jwtHeaderBase64
+        }
     }
 }
