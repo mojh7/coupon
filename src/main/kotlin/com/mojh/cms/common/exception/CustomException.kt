@@ -7,8 +7,13 @@ open class CustomException : RuntimeException {
         this.errorCode = errorCode
     }
 
-    constructor(errorCode: ErrorCode, cause: Throwable) : super(errorCode.message, cause) {
+    constructor(errorCode: ErrorCode, cause: Throwable) : super(cause) {
         this.errorCode = errorCode
+    }
+
+    override fun toString(): String {
+        val s = javaClass.name
+        return s + ": " + errorCode.message + cause?.let { "\ncause: " + cause.toString() }
     }
 }
 
