@@ -2,6 +2,7 @@ package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.exception.CustomException
 import com.mojh.cms.common.exception.ErrorCode
+import com.mojh.cms.security.AUTH_EXCEPTION_INFO
 import com.mojh.cms.security.PERMIT_ALL_GET_URI
 import com.mojh.cms.security.PERMIT_ALL_POST_URI
 import com.mojh.cms.security.service.UserDetailsServiceImpl
@@ -30,15 +31,22 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        jwtTokenUtils.extractTokenFrom(request.getHeader(AUTHORIZATION))?.let{
-            val accountId = jwtTokenUtils.parseAccountId(it)
-            if (jwtTokenUtils.isBlockedAccessToken(it, accountId)) {
-                throw CustomException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
-            }
+        try {
+            jwtTokenUtils.extractTokenFrom(request.getHeader(AUTHORIZATION))?.let{
+                jwtTokenUtils.validateToken(it)
+                val accountId = jwtTokenUtils.parseAccountId(it)
+                if (jwtTokenUtils.isBlockedAccessToken(it, accountId)) {
+                    throw CustomException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
+                }
 
-            val userAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
-            SecurityContextHolder.getContext().authentication =
-                UsernamePasswordAuthenticationToken(userAdapter, null, userAdapter.authorities)
+                val userAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
+                SecurityContextHolder.getContext().authentication =
+                    UsernamePasswordAuthenticationToken(userAdapter, null, userAdapter.authorities)
+            }
+        } catch (ex: CustomException) {
+            request.setAttribute(AUTH_EXCEPTION_INFO, ex);
+        } catch (ex: Exception) {
+            throw ex
         }
 
         filterChain.doFilter(request, response)
