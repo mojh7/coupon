@@ -2,9 +2,8 @@ package com.mojh.cms.coupon.service
 
 import com.mojh.cms.common.exception.CustomException
 import com.mojh.cms.common.exception.ErrorCode.COUPON_NOT_FOUND
-import com.mojh.cms.common.exception.ErrorCode.MEMBER_NOT_FOUND
-import com.mojh.cms.coupon.dto.MemberCouponResponse
 import com.mojh.cms.coupon.dto.CreateCouponRequest
+import com.mojh.cms.coupon.dto.MemberCouponResponse
 import com.mojh.cms.coupon.entity.MemberCoupon
 import com.mojh.cms.coupon.repository.CouponRepository
 import com.mojh.cms.coupon.repository.MemberCouponRepository
@@ -18,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional
 class CouponService(
     private val couponRepository: CouponRepository,
     private val memberCouponRepository: MemberCouponRepository,
-    private val memberRepository: MemberRepository
 ) {
 
     @Transactional
@@ -27,13 +25,9 @@ class CouponService(
     }
 
     @Transactional
-    fun downloadCoupon(couponInfoId: Long): MemberCouponResponse {
+    fun downloadCoupon(couponInfoId: Long, customer: Member): MemberCouponResponse {
         val couponInfo = couponRepository.findByIdOrNull(couponInfoId)
             ?: throw CustomException(COUPON_NOT_FOUND)
-
-        // security 추가하면 빠질 코드
-        val customer = memberRepository.findByIdOrNull(1L)
-            ?: throw CustomException(MEMBER_NOT_FOUND)
 
         val coupon = MemberCoupon(customer, couponInfo)
         memberCouponRepository.save(coupon)
