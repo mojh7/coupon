@@ -41,15 +41,19 @@ class AuthService(
     }
 
     @Transactional
-    fun logout(accessToken: String?, refreshToken: String) {
+    fun logout(accessTokenHeader: String?, refreshToken: String) {
         jwtTokenUtils.validateToken(refreshToken)
 
-        val accountId: String = accessToken?.let { jwtTokenUtils.parseAccountId(it) } ?: throw CustomException(INVALID_TOKEN)
-        jwtTokenUtils.isBlockedAccessToken(accessToken, accountId)
+        val accessToken = accessTokenHeader?.let { jwtTokenUtils.extractTokenFrom(it) } ?: throw CustomException(INVALID_TOKEN)
+        val accountId = jwtTokenUtils.parseAccountId(accessToken)
+
+        if (jwtTokenUtils.isBlockedAccessToken(accessToken, accountId)) {
+            throw CustomException(ALREADY_LOGGED_OUT_MEMBER)
+        }
 
         // refresh token redis에서 제거
         val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
-        if (refreshTokenSet.contains(refreshToken)) {
+        if (!refreshTokenSet.contains(refreshToken)) {
             throw CustomException(ALREADY_LOGGED_OUT_MEMBER)
         }
         refreshTokenSet.remove(refreshToken)
@@ -60,8 +64,12 @@ class AuthService(
     }
 
     @Transactional(readOnly = true)
-    fun reissueAccessToken(accessToken: String?, refreshToken: String): String {
-        val accountId: String = accessToken?.let { jwtTokenUtils.parseAccountId(it) } ?: throw CustomException(INVALID_TOKEN)
+    fun reissueAccessToken(accessTokenHeader: String?, refreshToken: String): String {
+        val accountId: String = accessTokenHeader?.let {
+            jwtTokenUtils.extractTokenFrom(it)
+        }?.let {
+            jwtTokenUtils.parseAccountId(it)
+        } ?: throw CustomException(INVALID_TOKEN)
 
         jwtTokenUtils.validateToken(refreshToken)
 

@@ -71,12 +71,7 @@ class JwtTokenUtils(
                 .body["id"] as String
         } catch (ex: ExpiredJwtException) {
             // 만료된 AccessToken 재발급에 필요한 로직이라 만료 됐어도 parsing
-            try {
-                ex.claims["id"] as String
-            } catch (ex: Exception) {
-                // Claims안의 값이 null이거나 이상한 값일 수도 있어서 한 번 더 예외 처리
-                throw CustomException(INVALID_TOKEN, ex)
-            }
+            ex.claims["id"] as String
         } catch (ex: Exception) {
             throw CustomException(INVALID_TOKEN, ex)
         }
