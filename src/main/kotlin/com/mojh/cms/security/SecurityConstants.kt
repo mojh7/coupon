@@ -7,6 +7,7 @@ val PERMIT_ALL_GET_URI = arrayOf(
 val PERMIT_ALL_POST_URI = arrayOf(
     "/member/signup",
     "/auth/login",
+    "/auth/logout",
     "/auth/reissue"
 )
 
