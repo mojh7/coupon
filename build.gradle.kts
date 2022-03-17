@@ -17,6 +17,8 @@ repositories {
     mavenCentral()
 }
 
+val kotestVersion = "5.2.1"
+
 dependencies {
     // web
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -27,6 +29,11 @@ dependencies {
     // security
     implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("org.springframework.security:spring-security-test")
+
+    // jjwt
+    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2")
 
     // kotlin
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -52,6 +59,12 @@ dependencies {
         exclude(group = "org.mockito")
     }
     testImplementation("com.ninja-squad:springmockk:3.0.1")
+
+    // kotest
+    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion") // for kotest framework
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion") // for kotest core jvm assertions
+    testImplementation("io.kotest:kotest-property:$kotestVersion") // for kotest property test
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0") // spring extensions
 }
 
 tasks.withType<KotlinCompile> {
@@ -77,6 +90,8 @@ configurations {
 }
 
 extra["snippetsDir"] = file("build/generated-snippets")
+
+extra["kotlin-coroutines.version"] = "1.6.0"
 
 tasks.test {
     project.property("snippetsDir")?.let { outputs.dir(it) }

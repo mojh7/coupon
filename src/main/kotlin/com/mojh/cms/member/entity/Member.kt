@@ -30,6 +30,6 @@ class Member(
         protected set
 
     enum class Role {
-        CUSTOMER, SELLER
+        ROLE_CUSTOMER, ROLE_SELLER
     }
 }

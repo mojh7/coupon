@@ -31,3 +31,8 @@ spring:
   h2:
     console:
       enabled: true
+
+jwt:
+  secret-key: 'jwttestplocaltestsecretkey1q2w3e4r!Useasecretkeyofatleast64bytes'
+  access-token-valid-time: 90000
+  refresh-token-valid-time: 150000

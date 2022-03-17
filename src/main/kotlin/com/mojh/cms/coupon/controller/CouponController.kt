@@ -1,10 +1,12 @@
 package com.mojh.cms.coupon.controller
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.coupon.dto.MemberCouponResponse
 import com.mojh.cms.coupon.dto.CreateCouponRequest
+import com.mojh.cms.coupon.dto.MemberCouponResponse
 import com.mojh.cms.coupon.service.CouponService
 import com.mojh.cms.member.entity.Member
+import com.mojh.cms.security.LoginMember
+import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -16,14 +18,17 @@ class CouponController(
     private val couponService: CouponService
 ) {
 
-    @PostMapping("/coupon")
-    fun createCoupon(@Valid @RequestBody createCouponRequest: CreateCouponRequest, admin: Member) {
-        couponService.createCoupon(createCouponRequest, admin)
+    @PostMapping("/coupons")
+    @Secured("ROLE_SELLER")
+    fun createCoupon(@Valid @RequestBody createCouponRequest: CreateCouponRequest,
+                     @LoginMember seller: Member) {
+        couponService.createCoupon(createCouponRequest, seller)
     }
 
     @PostMapping("/coupons/{couponInfoId}/download")
-//    fun downloadCoupon(@PathVariable couponInfoId: Long, customer: Member): ApiResponse<CouponResponse> {
-    fun downloadCoupon(@PathVariable couponInfoId: Long): ApiResponse<MemberCouponResponse> {
-        return ApiResponse.succeed(couponService.downloadCoupon(couponInfoId))
+    @Secured("ROLE_CUSTOMER")
+    fun downloadCoupon(@PathVariable couponInfoId: Long,
+                       @LoginMember customer: Member): ApiResponse<MemberCouponResponse> {
+        return ApiResponse.succeed(couponService.downloadCoupon(couponInfoId, customer))
     }
 }

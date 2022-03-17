@@ -10,11 +10,15 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.verify
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.Month
 
-internal class MemberCouponServiceTest : UnitTest() {
+@UnitTest
+internal class MemberCouponServiceTest {
     @MockK
     private lateinit var couponRepository: CouponRepository
 
