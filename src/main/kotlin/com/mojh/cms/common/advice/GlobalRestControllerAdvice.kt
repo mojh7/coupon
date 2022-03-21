@@ -42,7 +42,7 @@ class GlobalRestControllerAdvice {
     @ExceptionHandler(AccessDeniedException::class)
     @ResponseStatus(FORBIDDEN)
     fun handleAccessDeniedException(ex: AccessDeniedException): ApiResponse<*> {
-        LOGGER.warn(ex.printStackTrace())
+        LOGGER.warn(ex)
         return ApiResponse.failed(FORBIDDEN, "Access is denied")
     }
 

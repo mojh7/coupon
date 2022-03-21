@@ -32,4 +32,8 @@ class Member(
     enum class Role {
         ROLE_CUSTOMER, ROLE_SELLER
     }
+
+    fun isCustomer() = role == Role.ROLE_CUSTOMER
+
+    fun isSeller() = role == Role.ROLE_SELLER
 }

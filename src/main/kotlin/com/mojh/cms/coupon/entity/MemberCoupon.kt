@@ -2,14 +2,14 @@ package com.mojh.cms.coupon.entity
 
 import com.mojh.cms.common.BaseEntity
 import com.mojh.cms.member.entity.Member
+import org.springframework.security.access.AccessDeniedException
 import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
-class MemberCoupon(
+class MemberCoupon protected constructor(
     customer: Member,
     coupon: Coupon,
-    status: Status = Status.ISSUED,
 ) : BaseEntity() {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -23,7 +23,7 @@ class MemberCoupon(
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var status: Status = status
+    var status: Status = Status.ISSUED
         protected set
 
     var usedAt: LocalDateTime? = null
@@ -31,5 +31,14 @@ class MemberCoupon(
 
     enum class Status {
         ISSUED, USED, EXPIRED
+    }
+
+    companion object {
+        fun of(customer: Member, coupon: Coupon): MemberCoupon {
+            if (!customer.isCustomer()) {
+                throw AccessDeniedException("Customer 만 쿠폰을 다운 받을 수 있습니다")
+            }
+            return MemberCoupon(customer, coupon)
+        }
     }
 }

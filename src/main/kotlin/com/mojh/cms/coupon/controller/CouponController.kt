@@ -24,11 +24,4 @@ class CouponController(
                      @LoginMember seller: Member) {
         couponService.createCoupon(createCouponRequest, seller)
     }
-
-    @PostMapping("/coupons/{couponInfoId}/download")
-    @Secured("ROLE_CUSTOMER")
-    fun downloadCoupon(@PathVariable couponInfoId: Long,
-                       @LoginMember customer: Member): ApiResponse<MemberCouponResponse> {
-        return ApiResponse.succeed(couponService.downloadCoupon(couponInfoId, customer))
-    }
 }
