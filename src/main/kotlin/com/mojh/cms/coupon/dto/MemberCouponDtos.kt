@@ -11,9 +11,8 @@ data class MemberCouponResponse private constructor(
     val endAt: LocalDateTime
 ) {
     companion object {
-        fun from(memberCoupon: MemberCoupon) =
-            memberCoupon.coupon.let {
-                MemberCouponResponse(it.title, it.description, memberCoupon.status, it.startAt, it.endAt)
-            }
+        fun from(memberCoupon: MemberCoupon) = memberCoupon.coupon.run {
+            MemberCouponResponse(title, description, memberCoupon.status, startAt, endAt)
+        }
     }
 }

@@ -4,3 +4,8 @@ spring:
 
   jackson:
     property-naming-strategy: SNAKE_CASE
+
+
+coupon:
+  lock-key-prefix: 'CRL:'
+  count-key-prefix: 'CC:'

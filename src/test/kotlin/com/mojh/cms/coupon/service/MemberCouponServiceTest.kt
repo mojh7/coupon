@@ -35,7 +35,7 @@ internal class MemberCouponServiceTest {
 
     @BeforeEach
     internal fun setUp() {
-        seller = Member("accountId", "pw", Member.Role.SELLER)
+        seller = Member("accountId", "pw", Member.Role.ROLE_SELLER)
     }
 
     @DisplayName("쿠폰 정보 생성")
