@@ -57,10 +57,6 @@ class CouponService(
         val couponInfo = couponRepository.findByIdOrNull(couponId)
             ?: throw CustomException(ErrorCode.COUPON_DOES_NOT_EXIST)
 
-        if (memberCouponRepository.findAllByCustomerIdAndCouponId(customer.id!!, couponId).size >= 1) {
-            CustomException(ErrorCode.HAS_ALREADY_DOWNLOADED_COUPON)
-        }
-
         var result: MemberCouponResponse?
 
         val lock: RLock = redisson.getLock(COUPON_RLOCK_KEY_PREFIX + couponId)
@@ -71,6 +67,10 @@ class CouponService(
                 throw CustomException(ErrorCode.DOWNLOAD_COUPON_TIME_OUT)
             }
             LOGGER.info("lock 획득")
+
+            if (memberCouponRepository.findAllByCustomerIdAndCouponId(customer.id!!, couponId).size >= 1) {
+                throw CustomException(ErrorCode.HAS_ALREADY_DOWNLOADED_COUPON)
+            }
 
             val status = transactionManager.getTransaction(DefaultTransactionDefinition())
             try {

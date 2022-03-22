@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit
 class DownloadCouponTest(
     private val memberRepository: MemberRepository,
     private val couponService: CouponService,
-    private val memberCouponService: MemberCouponService,
     private val memberCouponRepository: MemberCouponRepository
 ) {
     private val THREAD_POOL_SIZE = 17
@@ -53,7 +52,7 @@ class DownloadCouponTest(
         for (i in 0 until THREAD_POOL_SIZE) {
             executorService.execute {
                 LOGGER.debug(i)
-                memberCouponService.downloadCoupon(couponId, customer)
+                couponService.downloadCoupon(couponId, customer)
             }
         }
 
@@ -67,11 +66,12 @@ class DownloadCouponTest(
         val memberCouponList = memberCouponRepository.findAllByCustomerIdAndCouponId(customer.id!!, couponId)
 
         println(memberCouponList.size)
-        memberCouponList.size shouldBe expectedMaxCount
+        memberCouponList.size shouldBe 1
     }
 
-    @Test
-    fun `쿠폰 다운로드 - lock 없는 버전`() {
+    */
+/*@Test
+    fun `쿠폰 다운로드 - lock 없는 테스트`() {
         val customer = memberRepository.save(Member("accountId1", "pw", Member.Role.ROLE_CUSTOMER))
         val seller = memberRepository.save(Member("accountId2", "pw", Member.Role.ROLE_SELLER))
 
@@ -93,7 +93,7 @@ class DownloadCouponTest(
         for (i in 0 until THREAD_POOL_SIZE) {
             executorService.execute {
                 LOGGER.debug(i)
-                memberCouponService.downloadCoupon2(couponId, customer)
+                couponService.downloadCoupon2(couponId, customer)
             }
         }
 
@@ -108,6 +108,8 @@ class DownloadCouponTest(
 
         println(memberCouponList.size)
         memberCouponList.size shouldBe expectedMaxCount
-    }
+    }*//*
 
-}*/
+
+}
+*/
