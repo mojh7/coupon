@@ -1,7 +1,7 @@
 package com.mojh.cms.member.controller
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.member.dto.SignupMemberRequest
+import com.mojh.cms.member.dto.request.SignupMemberRequest
 import com.mojh.cms.member.service.MemberService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*

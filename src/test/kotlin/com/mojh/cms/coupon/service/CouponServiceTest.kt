@@ -1,11 +1,10 @@
 package com.mojh.cms.coupon.service
 
 import com.mojh.cms.common.UnitTest
-import com.mojh.cms.coupon.dto.CreateCouponRequest
+import com.mojh.cms.coupon.dto.request.CreateCouponRequest
 import com.mojh.cms.coupon.repository.CouponRepository
 import com.mojh.cms.coupon.repository.MemberCouponRepository
 import com.mojh.cms.member.entity.Member
-import com.mojh.cms.member.repository.MemberRepository
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -14,11 +13,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.redisson.api.RedissonClient
+import org.springframework.transaction.PlatformTransactionManager
 import java.time.LocalDateTime
 import java.time.Month
 
 @UnitTest
-internal class MemberCouponServiceTest {
+internal class CouponServiceTest {
     @MockK
     private lateinit var couponRepository: CouponRepository
 
@@ -26,7 +27,10 @@ internal class MemberCouponServiceTest {
     private lateinit var memberCouponRepository: MemberCouponRepository
 
     @MockK
-    private lateinit var memberRepository: MemberRepository
+    private lateinit var redisson: RedissonClient
+
+    @MockK
+    private lateinit var transactionManager: PlatformTransactionManager
 
     @InjectMockKs
     private lateinit var couponService: CouponService

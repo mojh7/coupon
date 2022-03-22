@@ -1,6 +1,6 @@
 package com.mojh.cms.security.service
 
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.member.repository.MemberRepository
 import com.mojh.cms.security.MemberAdapter
@@ -13,6 +13,6 @@ class UserDetailsServiceImpl(private val memberRepository: MemberRepository) : U
     override fun loadUserByUsername(accountId: String): UserDetails {
         return memberRepository.findByAccountId(accountId)?.let {
             MemberAdapter(it)
-        } ?: throw CustomException(ErrorCode.MEMBER_NOT_FOUND)
+        } ?: throw CouponApplicationException(ErrorCode.MEMBER_NOT_FOUND)
     }
 }

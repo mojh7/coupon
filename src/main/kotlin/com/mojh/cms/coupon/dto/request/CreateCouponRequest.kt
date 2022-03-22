@@ -1,4 +1,4 @@
-package com.mojh.cms.coupon.dto
+package com.mojh.cms.coupon.dto.request
 
 import com.mojh.cms.coupon.entity.Coupon
 import com.mojh.cms.member.entity.Member
@@ -31,23 +31,5 @@ data class CreateCouponRequest(
         maxCount = this.maxCount,
         startAt = this.startAt,
         endAt = this.endAt
-    )
-}
-
-data class CouponResponse(
-    val title: String,
-    val description: String,
-    val maxCount: Int,
-    val status: Coupon.Status,
-    val startAt: LocalDateTime,
-    val endAt: LocalDateTime
-) {
-    constructor(coupon: Coupon): this(
-        title = coupon.title,
-        description = coupon.description,
-        maxCount = coupon.maxCount,
-        status = coupon.status,
-        startAt = coupon.startAt,
-        endAt = coupon.endAt
     )
 }

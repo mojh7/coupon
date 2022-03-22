@@ -2,7 +2,7 @@ package com.mojh.cms.security.jwt
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.security.AUTH_EXCEPTION_INFO
 import org.apache.logging.log4j.LogManager
 import org.springframework.http.HttpStatus.UNAUTHORIZED
@@ -25,7 +25,7 @@ class JwtAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : Auth
                           response: HttpServletResponse,
                           authException: AuthenticationException) {
         val responseBody = request.getAttribute(AUTH_EXCEPTION_INFO)?.let {
-            val ex = it as CustomException
+            val ex = it as CouponApplicationException
             LOGGER.warn(ex)
             objectMapper.writeValueAsString(ApiResponse.failed(ex.errorCode))
         } ?: {
