@@ -1,4 +1,4 @@
-package com.mojh.cms.member.dto
+package com.mojh.cms.member.dto.request
 
 import com.mojh.cms.member.entity.Member
 import javax.validation.constraints.NotBlank

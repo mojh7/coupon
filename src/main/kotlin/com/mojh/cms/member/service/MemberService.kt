@@ -2,7 +2,7 @@ package com.mojh.cms.member.service
 
 import com.mojh.cms.common.exception.CustomException
 import com.mojh.cms.common.exception.ErrorCode.DUPLICATE_ACCOUNT_ID
-import com.mojh.cms.member.dto.SignupMemberRequest
+import com.mojh.cms.member.dto.request.SignupMemberRequest
 import com.mojh.cms.member.repository.MemberRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
