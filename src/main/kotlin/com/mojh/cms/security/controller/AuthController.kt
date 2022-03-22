@@ -1,9 +1,9 @@
 package com.mojh.cms.security.controller
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.member.dto.LoginRequest
-import com.mojh.cms.member.dto.LogoutRequest
-import com.mojh.cms.member.dto.ReissueTokenRequest
+import com.mojh.cms.security.dto.request.LoginRequest
+import com.mojh.cms.security.dto.request.LogoutRequest
+import com.mojh.cms.security.dto.request.ReissueTokenRequest
 import com.mojh.cms.security.service.AuthService
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.ResponseEntity
