@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager
 import org.redisson.api.RBucket
 import org.redisson.api.RLock
 import org.redisson.api.RedissonClient
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
@@ -28,9 +29,13 @@ class CouponService(
 ) {
     companion object {
         private val LOGGER = LogManager.getLogger()
-        const val COUPON_RLOCK_KEY_PREFIX = "CRL:"
-        const val COUPON_COUNT_KEY_PREFIX = "CC:"
     }
+
+    @Value("\${coupon.lock-key-prefix}")
+    private val COUPON_RLOCK_KEY_PREFIX: String = ""
+
+    @Value("\${coupon.count-key-prefix}")
+    private val COUPON_COUNT_KEY_PREFIX: String = ""
 
     @Transactional
     fun createCoupon(createCouponRequest: CreateCouponRequest, seller: Member): Long? {
@@ -48,17 +53,17 @@ class CouponService(
     }
 
 
-    fun downloadCoupon(couponInfoId: Long, customer: Member): MemberCouponResponse {
-        val couponInfo = couponRepository.findByIdOrNull(couponInfoId)
+    fun downloadCoupon(couponId: Long, customer: Member): MemberCouponResponse {
+        val couponInfo = couponRepository.findByIdOrNull(couponId)
             ?: throw CustomException(ErrorCode.COUPON_DOES_NOT_EXIST)
 
-        if (memberCouponRepository.findAllByCustomerIdAndCouponId(customer.id!!, couponInfoId).size >= 1) {
+        if (memberCouponRepository.findAllByCustomerIdAndCouponId(customer.id!!, couponId).size >= 1) {
             CustomException(ErrorCode.HAS_ALREADY_DOWNLOADED_COUPON)
         }
 
         var result: MemberCouponResponse?
 
-        val lock: RLock = redisson.getLock(COUPON_RLOCK_KEY_PREFIX + couponInfoId)
+        val lock: RLock = redisson.getLock(COUPON_RLOCK_KEY_PREFIX + couponId)
 
         try {
             if (!lock.tryLock(10, 5, TimeUnit.SECONDS)) {
@@ -69,7 +74,7 @@ class CouponService(
 
             val status = transactionManager.getTransaction(DefaultTransactionDefinition())
             try {
-                val couponCountRBucket: RBucket<Int> = redisson.getBucket(COUPON_COUNT_KEY_PREFIX + couponInfoId)
+                val couponCountRBucket: RBucket<Int> = redisson.getBucket(COUPON_COUNT_KEY_PREFIX + couponId)
                 val couponCount = couponCountRBucket.get()
                 if (!couponCountRBucket.isExists || couponCount <= 0) {
                     LOGGER.info("준비된 모든 쿠폰 소진")
