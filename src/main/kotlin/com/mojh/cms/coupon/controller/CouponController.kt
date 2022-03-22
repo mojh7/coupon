@@ -1,8 +1,8 @@
 package com.mojh.cms.coupon.controller
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.coupon.dto.CreateCouponRequest
-import com.mojh.cms.coupon.dto.MemberCouponResponse
+import com.mojh.cms.coupon.dto.request.CreateCouponRequest
+import com.mojh.cms.coupon.dto.response.MemberCouponResponse
 import com.mojh.cms.coupon.service.CouponService
 import com.mojh.cms.member.entity.Member
 import com.mojh.cms.security.LoginMember

@@ -2,8 +2,9 @@ package com.mojh.cms.coupon.service
 
 import com.mojh.cms.common.exception.CustomException
 import com.mojh.cms.common.exception.ErrorCode
-import com.mojh.cms.coupon.dto.CreateCouponRequest
-import com.mojh.cms.coupon.dto.MemberCouponResponse
+import com.mojh.cms.coupon.dto.request.CreateCouponRequest
+import com.mojh.cms.coupon.dto.response.MemberCouponResponse
+import com.mojh.cms.coupon.dto.response.toMemberCouponResponse
 import com.mojh.cms.coupon.entity.MemberCoupon
 import com.mojh.cms.coupon.repository.CouponRepository
 import com.mojh.cms.coupon.repository.MemberCouponRepository
@@ -87,7 +88,7 @@ class CouponService(
                 memberCouponRepository.save(memberCoupon)
 
                 transactionManager.commit(status)
-                result = MemberCouponResponse.from(memberCoupon)
+                result = memberCoupon.toMemberCouponResponse()
                 LOGGER.info("쿠폰 발급 성공")
             } catch (ex: Exception) {
                 transactionManager.rollback(status)
