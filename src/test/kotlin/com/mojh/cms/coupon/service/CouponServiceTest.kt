@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 import java.time.Month
 
 @UnitTest
-internal class MemberCouponServiceTest {
+internal class CouponServiceTest {
     @MockK
     private lateinit var couponRepository: CouponRepository
 
