@@ -1,6 +1,6 @@
 package com.mojh.cms.member.service
 
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode.DUPLICATE_ACCOUNT_ID
 import com.mojh.cms.member.dto.request.SignupMemberRequest
 import com.mojh.cms.member.repository.MemberRepository
@@ -17,7 +17,7 @@ class MemberService(
     @Transactional
     fun signup(signupMemberRequest: SignupMemberRequest) {
         if (memberRepository.existsByAccountId(signupMemberRequest.accountId)) {
-            throw CustomException(DUPLICATE_ACCOUNT_ID)
+            throw CouponApplicationException(DUPLICATE_ACCOUNT_ID)
         }
 
         passwordEncoder.encode(signupMemberRequest.password).let {

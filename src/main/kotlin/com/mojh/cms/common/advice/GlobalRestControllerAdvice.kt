@@ -1,7 +1,7 @@
 package com.mojh.cms.common.advice
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import org.apache.logging.log4j.LogManager
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity
@@ -32,8 +32,8 @@ class GlobalRestControllerAdvice {
             .body(ApiResponse.failed(BAD_REQUEST, errors))
     }
 
-    @ExceptionHandler(CustomException::class)
-    fun handleCustomException(ex: CustomException): ResponseEntity<ApiResponse<*>> {
+    @ExceptionHandler(CouponApplicationException::class)
+    fun handleCustomException(ex: CouponApplicationException): ResponseEntity<ApiResponse<*>> {
         LOGGER.warn(ex)
         return ResponseEntity.status(ex.errorCode.status)
             .body(ApiResponse.failed(ex.errorCode))

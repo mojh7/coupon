@@ -2,7 +2,7 @@ package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.BaseTest
 import com.mojh.cms.common.config.RedissonConfig
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.security.BEARER_PREFIX
 import io.kotest.assertions.assertSoftly
@@ -80,21 +80,21 @@ internal class JwtTokenUtilsTest(
                 test("유효하더라도 파싱 시 CustomException 'INVALID_TOKEN'을 던진다") {
                     val refreshToken = jwtTokenUtils.createRefreshToken()
 
-                    shouldThrow<CustomException> {
+                    shouldThrow<CouponApplicationException> {
                         jwtTokenUtils.parseAccountId(refreshToken)
                     }.errorCode shouldBe ErrorCode.INVALID_TOKEN
                 }
 
                 // Jwts에서 requireSubject("access") subject : "access" 인지 확인하기 때문
                 test("만료됐어도 파싱 시 CustomException 'INVALID_TOKEN'을 던진다") {
-                    shouldThrow<CustomException> {
+                    shouldThrow<CouponApplicationException> {
                         jwtTokenUtils.parseAccountId(EXPIRED_REFRESH_TOKEN)
                     }.errorCode shouldBe ErrorCode.INVALID_TOKEN
                 }
             }
 
             test("유효하지 않은 토큰으로 파싱 시 CustomException 'INVALID_TOKEN'을 던진다") {
-                shouldThrow<CustomException> {
+                shouldThrow<CouponApplicationException> {
                     jwtTokenUtils.parseAccountId(INVALID_TOKEN)
                 }.errorCode shouldBe ErrorCode.INVALID_TOKEN
             }
@@ -111,7 +111,7 @@ internal class JwtTokenUtilsTest(
                 }
 
                 test("만료됐으면 남은 만료 시간을 확인할 경우 CustomException 'EXPIRED_TOKEN'을 던진다") {
-                    shouldThrow<CustomException> {
+                    shouldThrow<CouponApplicationException> {
                         jwtTokenUtils.getRemainingExpirationTime(EXPIRED_ACCESS_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
@@ -127,7 +127,7 @@ internal class JwtTokenUtilsTest(
                 }
 
                 test("만료됐으면 남은 만료 시간을 확인할 경우 CustomException 'EXPIRED_TOKEN'을 던진다") {
-                    shouldThrow<CustomException> {
+                    shouldThrow<CouponApplicationException> {
                         jwtTokenUtils.getRemainingExpirationTime(EXPIRED_REFRESH_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
@@ -135,7 +135,7 @@ internal class JwtTokenUtilsTest(
 
 
             test("유효하지 않은 토큰으로 남은 만료 시간을 확인할 경우 CustomException 'INVALID_TOKEN'을 던진다") {
-                shouldThrow<CustomException> {
+                shouldThrow<CouponApplicationException> {
                     jwtTokenUtils.getRemainingExpirationTime(INVALID_TOKEN)
                 }.errorCode shouldBe ErrorCode.INVALID_TOKEN
             }
@@ -152,7 +152,7 @@ internal class JwtTokenUtilsTest(
                 }
 
                 test("만료됐으면 CustomException 'EXPIRED_TOKEN'을 던진다") {
-                    shouldThrow<CustomException> {
+                    shouldThrow<CouponApplicationException> {
                         jwtTokenUtils.validateToken(EXPIRED_ACCESS_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
@@ -168,7 +168,7 @@ internal class JwtTokenUtilsTest(
                 }
 
                 test("만료됐으면 CustomException 'EXPIRED_TOKEN'을 던진다") {
-                    shouldThrow<CustomException> {
+                    shouldThrow<CouponApplicationException> {
                         jwtTokenUtils.validateToken(EXPIRED_REFRESH_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
@@ -176,7 +176,7 @@ internal class JwtTokenUtilsTest(
 
 
             test("유효하지 않은 토큰으로 유효성 검사를 하면 CustomException 'INVALID_TOKEN'을 던진다") {
-                shouldThrow<CustomException> {
+                shouldThrow<CouponApplicationException> {
                     jwtTokenUtils.validateToken(INVALID_TOKEN)
                 }.errorCode shouldBe ErrorCode.INVALID_TOKEN
             }

@@ -1,6 +1,6 @@
 package com.mojh.cms.security.jwt
 
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode.EXPIRED_TOKEN
 import com.mojh.cms.common.exception.ErrorCode.INVALID_TOKEN
 import com.mojh.cms.security.ACCESS_TOKEN_REDIS_KEY_PREFIX
@@ -71,12 +71,12 @@ class JwtTokenUtils(
                 .body["id"] as String
         } catch (ex: ExpiredJwtException) {
             if (ex.claims["sub"] != "access") {
-                throw CustomException(INVALID_TOKEN)
+                throw CouponApplicationException(INVALID_TOKEN)
             }
             // 만료된 AccessToken 재발급에 필요한 로직이라 만료 됐어도 parsing
             ex.claims["id"] as String
         } catch (ex: Exception) {
-            throw CustomException(INVALID_TOKEN, ex)
+            throw CouponApplicationException(INVALID_TOKEN, ex)
         }
     }
 
@@ -92,8 +92,8 @@ class JwtTokenUtils(
                 .body.expiration.time - Date().time
         } catch (ex: Exception) {
             when (ex) {
-                is ExpiredJwtException -> throw CustomException(EXPIRED_TOKEN, ex)
-                else -> throw CustomException(INVALID_TOKEN, ex)
+                is ExpiredJwtException -> throw CouponApplicationException(EXPIRED_TOKEN, ex)
+                else -> throw CouponApplicationException(INVALID_TOKEN, ex)
             }
         }
 
@@ -106,8 +106,8 @@ class JwtTokenUtils(
             true
         } catch (ex: Exception) {
             when (ex) {
-                is ExpiredJwtException -> throw CustomException(EXPIRED_TOKEN, ex)
-                else -> throw CustomException(INVALID_TOKEN, ex)
+                is ExpiredJwtException -> throw CouponApplicationException(EXPIRED_TOKEN, ex)
+                else -> throw CouponApplicationException(INVALID_TOKEN, ex)
             }
         }
 

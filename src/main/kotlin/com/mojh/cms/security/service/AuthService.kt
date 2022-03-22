@@ -1,6 +1,6 @@
 package com.mojh.cms.security.service
 
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode.*
 import com.mojh.cms.member.repository.MemberRepository
 import com.mojh.cms.security.dto.TokensResponse
@@ -25,10 +25,10 @@ class AuthService(
     @Transactional
     fun login(loginRequest: LoginRequest): TokensResponse {
         val member = memberRepository.findByAccountId(loginRequest.accountId)
-            ?: throw CustomException(WRONG_ACCOUNT_ID)
+            ?: throw CouponApplicationException(WRONG_ACCOUNT_ID)
 
         if (!passwordEncoder.matches(loginRequest.password, member.password)) {
-            throw CustomException(PASSWORD_NOT_MATCHED)
+            throw CouponApplicationException(PASSWORD_NOT_MATCHED)
         }
 
         val accessToken = jwtTokenUtils.createAccessToken(loginRequest.accountId)
@@ -44,17 +44,17 @@ class AuthService(
     fun logout(accessTokenHeader: String?, refreshToken: String) {
         jwtTokenUtils.validateToken(refreshToken)
 
-        val accessToken = accessTokenHeader?.let { jwtTokenUtils.extractTokenFrom(it) } ?: throw CustomException(INVALID_TOKEN)
+        val accessToken = accessTokenHeader?.let { jwtTokenUtils.extractTokenFrom(it) } ?: throw CouponApplicationException(INVALID_TOKEN)
         val accountId = jwtTokenUtils.parseAccountId(accessToken)
 
         if (jwtTokenUtils.isBlockedAccessToken(accessToken, accountId)) {
-            throw CustomException(ALREADY_LOGGED_OUT_MEMBER)
+            throw CouponApplicationException(ALREADY_LOGGED_OUT_MEMBER)
         }
 
         // refresh token redis에서 제거
         val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
         if (!refreshTokenSet.contains(refreshToken)) {
-            throw CustomException(ALREADY_LOGGED_OUT_MEMBER)
+            throw CouponApplicationException(ALREADY_LOGGED_OUT_MEMBER)
         }
         refreshTokenSet.remove(refreshToken)
 
@@ -69,13 +69,13 @@ class AuthService(
             jwtTokenUtils.extractTokenFrom(it)
         }?.let {
             jwtTokenUtils.parseAccountId(it)
-        } ?: throw CustomException(INVALID_TOKEN)
+        } ?: throw CouponApplicationException(INVALID_TOKEN)
 
         jwtTokenUtils.validateToken(refreshToken)
 
         val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
         if (!refreshTokenSet.contains(refreshToken)) {
-            throw CustomException(NEED_TO_LOGIN_AGAIN)
+            throw CouponApplicationException(NEED_TO_LOGIN_AGAIN)
         }
 
         return jwtTokenUtils.createAccessToken(accountId)

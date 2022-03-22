@@ -1,6 +1,6 @@
 package com.mojh.cms.common.exception
 
-open class CustomException : RuntimeException {
+open class CouponApplicationException : RuntimeException {
     val errorCode: ErrorCode
 
     constructor(errorCode: ErrorCode) : super(errorCode.message) {
@@ -13,7 +13,7 @@ open class CustomException : RuntimeException {
 
     override fun toString(): String {
         val s = javaClass.name
-        return s + ": " + errorCode.message + cause?.let { "\ncause: " + cause.toString() }
+        return s + ": " + errorCode.message + if(cause == null) "" else "\ncause: " + cause.toString()
     }
 }
 

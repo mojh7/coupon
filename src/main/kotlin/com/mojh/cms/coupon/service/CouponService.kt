@@ -1,6 +1,6 @@
 package com.mojh.cms.coupon.service
 
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.coupon.dto.request.CreateCouponRequest
 import com.mojh.cms.coupon.dto.response.MemberCouponResponse
@@ -46,7 +46,7 @@ class CouponService(
 
     fun enable(couponId: Long, seller: Member) {
         val coupon = couponRepository.findByIdOrNull(couponId)
-            ?: throw CustomException(ErrorCode.COUPON_DOES_NOT_EXIST)
+            ?: throw CouponApplicationException(ErrorCode.COUPON_DOES_NOT_EXIST)
 
         redisson.getBucket<Int>(COUPON_COUNT_KEY_PREFIX + couponId).set(coupon.maxCount)
 
@@ -56,7 +56,7 @@ class CouponService(
 
     fun downloadCoupon(couponId: Long, customer: Member): MemberCouponResponse {
         val couponInfo = couponRepository.findByIdOrNull(couponId)
-            ?: throw CustomException(ErrorCode.COUPON_DOES_NOT_EXIST)
+            ?: throw CouponApplicationException(ErrorCode.COUPON_DOES_NOT_EXIST)
 
         var result: MemberCouponResponse?
 
@@ -65,12 +65,12 @@ class CouponService(
         try {
             if (!lock.tryLock(10, 5, TimeUnit.SECONDS)) {
                 LOGGER.info("lock 획득 실패")
-                throw CustomException(ErrorCode.DOWNLOAD_COUPON_TIME_OUT)
+                throw CouponApplicationException(ErrorCode.DOWNLOAD_COUPON_TIME_OUT)
             }
             LOGGER.info("lock 획득")
 
             if (memberCouponRepository.findAllByCustomerIdAndCouponId(customer.id!!, couponId).size >= 1) {
-                throw CustomException(ErrorCode.HAS_ALREADY_DOWNLOADED_COUPON)
+                throw CouponApplicationException(ErrorCode.HAS_ALREADY_DOWNLOADED_COUPON)
             }
 
             val status = transactionManager.getTransaction(DefaultTransactionDefinition())
@@ -79,7 +79,7 @@ class CouponService(
                 val couponCount = couponCountRBucket.get()
                 if (!couponCountRBucket.isExists || couponCount <= 0) {
                     LOGGER.info("준비된 모든 쿠폰 소진")
-                    throw CustomException(ErrorCode.COUPONS_ARE_EXHAUSTED)
+                    throw CouponApplicationException(ErrorCode.COUPONS_ARE_EXHAUSTED)
                 }
 
                 LOGGER.info("coupon 갯수 : $couponCount")
@@ -95,13 +95,13 @@ class CouponService(
                 throw ex
             }
         } catch (ex: InterruptedException) { // thread가 작동 전 interrupted 될 때
-            throw CustomException(ErrorCode.COUPON_DOWNLOAD_FAILED)
+            throw CouponApplicationException(ErrorCode.COUPON_DOWNLOAD_FAILED)
         } finally {
             lock.unlock()
             LOGGER.info("lock 반납")
         }
 
-        return result ?: throw CustomException(ErrorCode.COUPON_DOWNLOAD_FAILED)
+        return result ?: throw CouponApplicationException(ErrorCode.COUPON_DOWNLOAD_FAILED)
     }
 
     /*

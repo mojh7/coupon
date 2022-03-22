@@ -1,6 +1,6 @@
 package com.mojh.cms.security.jwt
 
-import com.mojh.cms.common.exception.CustomException
+import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.security.AUTH_EXCEPTION_INFO
 import com.mojh.cms.security.PERMIT_ALL_GET_URI
@@ -36,14 +36,14 @@ class JwtAuthenticationFilter(
                 jwtTokenUtils.validateToken(it)
                 val accountId = jwtTokenUtils.parseAccountId(it)
                 if (jwtTokenUtils.isBlockedAccessToken(it, accountId)) {
-                    throw CustomException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
+                    throw CouponApplicationException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
                 }
 
                 val memberAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
                 SecurityContextHolder.getContext().authentication =
                     UsernamePasswordAuthenticationToken(memberAdapter, null, memberAdapter.authorities)
             }
-        } catch (ex: CustomException) {
+        } catch (ex: CouponApplicationException) {
             request.setAttribute(AUTH_EXCEPTION_INFO, ex);
         }
 
