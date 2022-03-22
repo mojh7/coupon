@@ -70,6 +70,9 @@ class JwtTokenUtils(
                 .parseClaimsJws(accessToken)
                 .body["id"] as String
         } catch (ex: ExpiredJwtException) {
+            if (ex.claims["sub"] != "access") {
+                throw CustomException(INVALID_TOKEN)
+            }
             // 만료된 AccessToken 재발급에 필요한 로직이라 만료 됐어도 parsing
             ex.claims["id"] as String
         } catch (ex: Exception) {
