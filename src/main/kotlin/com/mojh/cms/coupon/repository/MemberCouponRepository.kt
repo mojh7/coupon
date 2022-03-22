@@ -4,5 +4,5 @@ import com.mojh.cms.coupon.entity.MemberCoupon
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface MemberCouponRepository : JpaRepository<MemberCoupon, Long> {
-    fun findMemberIdAndCouponId(memberId: Long, couponId: Long): MemberCoupon?
+    fun findAllByCustomerIdAndCouponId(customerId: Long, couponId: Long): MutableList<MemberCoupon>
 }

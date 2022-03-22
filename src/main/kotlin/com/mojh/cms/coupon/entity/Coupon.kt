@@ -3,6 +3,7 @@ package com.mojh.cms.coupon.entity
 import com.mojh.cms.common.BaseEntity
 import com.mojh.cms.event.entity.Event
 import com.mojh.cms.member.entity.Member
+import org.springframework.security.access.AccessDeniedException
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -13,7 +14,6 @@ class Coupon(
     title: String,
     description: String = "",
     maxCount: Int,
-    status: Status = Status.CREATED,
     startAt: LocalDateTime,
     endAt: LocalDateTime
 ) : BaseEntity() {
@@ -41,7 +41,7 @@ class Coupon(
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var status: Status = status
+    var status: Status = Status.CREATED
         protected set
 
     @Column(nullable = false)
@@ -54,5 +54,13 @@ class Coupon(
 
     enum class Status {
         CREATED, ENABLED, DISABLED
+    }
+
+    fun enable(seller: Member) {
+        if (!seller.isSeller()) {
+            throw AccessDeniedException("Seller만 쿠폰을 활성화 할 수 있습니다.")
+        }
+
+        status = Status.ENABLED
     }
 }

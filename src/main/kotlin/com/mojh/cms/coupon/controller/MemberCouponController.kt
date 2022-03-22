@@ -8,19 +8,21 @@ import com.mojh.cms.security.LoginMember
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@RequestMapping
 class MemberCouponController(
     val memberCouponService: MemberCouponService
 ) {
 
 
-    @PostMapping("/coupons/{couponInfoId}/download")
+    @PostMapping("/coupons/{couponId}/download")
     @Secured("ROLE_CUSTOMER")
-    fun downloadCoupon(@PathVariable couponInfoId: Long,
+    fun downloadCoupon(@PathVariable couponId: Long,
                        @LoginMember customer: Member
     ): ApiResponse<MemberCouponResponse> {
-        return ApiResponse.succeed(memberCouponService.downloadCoupon(couponInfoId, customer))
+        return ApiResponse.succeed(memberCouponService.downloadCoupon(couponId, customer))
     }
 }
