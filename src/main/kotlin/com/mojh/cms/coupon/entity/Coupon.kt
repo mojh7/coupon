@@ -1,10 +1,10 @@
 package com.mojh.cms.coupon.entity
 
 import com.mojh.cms.common.BaseEntity
+import com.mojh.cms.common.embeddable.Period
 import com.mojh.cms.event.entity.Event
 import com.mojh.cms.member.entity.Member
 import org.springframework.security.access.AccessDeniedException
-import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
@@ -14,8 +14,7 @@ class Coupon(
     title: String,
     description: String = "",
     maxCount: Int,
-    startAt: LocalDateTime,
-    endAt: LocalDateTime
+    validPeriod: Period,
 ) : BaseEntity() {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -45,12 +44,7 @@ class Coupon(
         protected set
 
     @Column(nullable = false)
-    var startAt: LocalDateTime = startAt
-        protected set
-
-    @Column(updatable = false)
-    var endAt: LocalDateTime = endAt
-        protected set
+    var validPeriod: Period = validPeriod
 
     enum class Status {
         CREATED, ENABLED, DISABLED
