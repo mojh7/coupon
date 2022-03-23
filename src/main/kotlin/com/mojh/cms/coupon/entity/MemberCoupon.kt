@@ -30,7 +30,7 @@ class MemberCoupon protected constructor(
         protected set
 
     enum class Status {
-        ISSUED, USED, EXPIRED
+        ISSUED, USED
     }
 
     companion object {
