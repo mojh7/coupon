@@ -41,4 +41,11 @@ class MemberCoupon protected constructor(
             return MemberCoupon(customer, coupon)
         }
     }
+
+    fun isAvailable(now: LocalDateTime): Boolean {
+        if (status != Status.ISSUED || !coupon.validPeriod.isValid(now)) {
+            return false
+        }
+        return true
+    }
 }
