@@ -1,6 +1,8 @@
 package com.mojh.cms.coupon.entity
 
 import com.mojh.cms.common.BaseEntity
+import com.mojh.cms.common.exception.CouponApplicationException
+import com.mojh.cms.common.exception.ErrorCode.HAS_ALREADY_BEEN_USED_OR_EXPIRED
 import com.mojh.cms.member.entity.Member
 import org.springframework.security.access.AccessDeniedException
 import java.time.LocalDateTime
@@ -36,7 +38,7 @@ class MemberCoupon protected constructor(
     companion object {
         fun of(customer: Member, coupon: Coupon): MemberCoupon {
             if (!customer.isCustomer()) {
-                throw AccessDeniedException("Customer 만 쿠폰을 다운 받을 수 있습니다")
+                throw AccessDeniedException("회원만 쿠폰을 다운 받을 수 있습니다")
             }
             return MemberCoupon(customer, coupon)
         }
@@ -47,5 +49,15 @@ class MemberCoupon protected constructor(
             return false
         }
         return true
+    }
+
+    fun use(customer: Member) {
+        if (this.customer.equals(customer)) {
+            throw AccessDeniedException("해당 쿠폰을 소유한 회원이 아닙니다")
+        }
+        if (!isAvailable(LocalDateTime.now())) {
+            throw CouponApplicationException(HAS_ALREADY_BEEN_USED_OR_EXPIRED)
+        }
+        status = Status.USED
     }
 }
