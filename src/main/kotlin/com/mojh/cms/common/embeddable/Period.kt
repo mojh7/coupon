@@ -6,11 +6,20 @@ import javax.persistence.Embeddable
 
 @Embeddable
 class Period(
-    @Column var startAt: LocalDateTime,
-    @Column var endAt: LocalDateTime
+    @Column
+    var startAt: LocalDateTime,
+
+    @Column
+    var endAt: LocalDateTime
 ) {
+    init {
+        require(startAt <= endAt) { "시작 일시는 종료 일시보다 같거나 빨라야 합니다." }
+    }
     /**
-     * 시작기간 <= now <= 종료기간
+     * 시작 일시 <= dateTime <= 종료 일시
      */
-    fun isValid(now: LocalDateTime) = !(now.isBefore(startAt) || now.isAfter(endAt))
+    fun contains(dateTime: LocalDateTime) = (startAt..endAt).contains(dateTime)
 }
+
+
+

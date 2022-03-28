@@ -8,7 +8,6 @@ import com.mojh.cms.member.entity.Member
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 @Service
 class MemberCouponService(
@@ -16,9 +15,8 @@ class MemberCouponService(
 ) {
 
     fun findAvailableCouponList(customer: Member): List<MemberCouponResponse> {
-        val now: LocalDateTime = LocalDateTime.now()
         return memberCouponRepository.findAllByCustomerId(customer.id!!)
-            .filter { it.isAvailable(now) }
+            .filter { it.isAvailable() }
             .map { MemberCouponResponse.from(it) }
     }
 

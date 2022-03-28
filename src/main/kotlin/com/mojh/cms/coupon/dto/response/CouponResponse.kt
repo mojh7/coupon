@@ -17,8 +17,8 @@ data class CouponResponse private constructor(
             description = coupon.description,
             maxCount = coupon.maxCount,
             status = coupon.status,
-            startAt = coupon.validPeriod.startAt,
-            endAt = coupon.validPeriod.endAt
+            startAt = coupon.availablePeriod.startAt,
+            endAt = coupon.availablePeriod.endAt
         )
     }
 }

@@ -44,20 +44,25 @@ class MemberCoupon protected constructor(
         }
     }
 
-    fun isAvailable(now: LocalDateTime): Boolean {
-        if (status != Status.ISSUED || !coupon.validPeriod.isValid(now)) {
+    fun isAvailable(): Boolean {
+        if (status != Status.ISSUED || !coupon.isAvailable()) {
             return false
         }
         return true
     }
 
     fun use(customer: Member) {
-        if (this.customer.equals(customer)) {
-            throw AccessDeniedException("해당 쿠폰을 소유한 회원이 아닙니다")
-        }
-        if (!isAvailable(LocalDateTime.now())) {
+        verifyOwner(customer)
+        if (!isAvailable()) {
             throw CouponApplicationException(HAS_ALREADY_BEEN_USED_OR_EXPIRED)
         }
         status = Status.USED
+    }
+
+    private fun verifyOwner(customer: Member): Boolean {
+        if (!this.customer.equals(customer)) {
+            throw AccessDeniedException("해당 쿠폰을 소유한 회원이 아닙니다")
+        }
+        return true
     }
 }

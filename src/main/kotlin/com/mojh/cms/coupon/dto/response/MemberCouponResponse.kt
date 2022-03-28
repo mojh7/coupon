@@ -15,8 +15,8 @@ data class MemberCouponResponse private constructor(
             title = memberCoupon.coupon.title,
             description = memberCoupon.coupon.description,
             status = memberCoupon.status,
-            startAt = memberCoupon.coupon.validPeriod.startAt,
-            endAt = memberCoupon.coupon.validPeriod.endAt
+            startAt = memberCoupon.coupon.availablePeriod.startAt,
+            endAt = memberCoupon.coupon.availablePeriod.endAt
         )
     }
 }

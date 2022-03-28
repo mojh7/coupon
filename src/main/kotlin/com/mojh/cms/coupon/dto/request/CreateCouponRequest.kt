@@ -30,6 +30,6 @@ data class CreateCouponRequest(
         title = this.title,
         description = this.description,
         maxCount = this.maxCount,
-        validPeriod = Period(this.startAt, this.endAt)
+        availablePeriod = Period(this.startAt, this.endAt)
     )
 }
