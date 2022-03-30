@@ -14,7 +14,7 @@ class MemberCouponService(
     private val memberCouponRepository: MemberCouponRepository,
 ) {
 
-    fun findAvailableCouponList(customer: Member): List<MemberCouponResponse> {
+    fun findAllAvailableCoupons(customer: Member): List<MemberCouponResponse> {
         return memberCouponRepository.findAllByCustomerId(customer.id!!)
             .filter { it.isAvailable() }
             .map { MemberCouponResponse.from(it) }

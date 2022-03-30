@@ -15,7 +15,7 @@ class MemberCouponController(
     @GetMapping
     @Secured("ROLE_CUSTOMER")
     fun findAvailableCouponList(@LoginMember customer: Member) =
-        ApiResponse.succeed(memberCouponService.findAvailableCouponList(customer))
+        ApiResponse.succeed(memberCouponService.findAllAvailableCoupons(customer))
 
     @PostMapping("/{memberCouponId}/use")
     @Secured("ROLE_CUSTOMER")
