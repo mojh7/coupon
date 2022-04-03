@@ -19,8 +19,7 @@ class Coupon(
 ) : BaseEntity() {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    var seller: Member = seller
-        protected set
+    val seller: Member = seller
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = true)
@@ -53,7 +52,7 @@ class Coupon(
 
     fun isAvailable(): Boolean {
         val now = LocalDateTime.now()
-        if (status != Status.ENABLED || availablePeriod.contains(now)) {
+        if (status != Status.ENABLED || !availablePeriod.contains(now)) {
             return false
         }
         return true
@@ -61,7 +60,7 @@ class Coupon(
 
     fun enable(seller: Member) {
         if (!seller.isSeller()) {
-            throw AccessDeniedException("Seller만 쿠폰을 활성화 할 수 있습니다.")
+            throw AccessDeniedException("판매자만 쿠폰을 활성화 할 수 있습니다.")
         }
         status = Status.ENABLED
     }

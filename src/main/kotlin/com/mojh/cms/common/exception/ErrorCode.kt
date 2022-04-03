@@ -27,8 +27,9 @@ enum class ErrorCode(
     HAS_ALREADY_DOWNLOADED_COUPON(BAD_REQUEST, "202", "이미 쿠폰을 다운 받았습니다."),
     DOWNLOAD_COUPON_TIME_OUT(REQUEST_TIMEOUT, "203", "time out error"),
     COUPONS_ARE_EXHAUSTED(BAD_REQUEST, "204", "쿠폰이 모두 소진되었습니다."),
-    HAS_ALREADY_BEEN_USED_OR_EXPIRED(BAD_REQUEST, "205", "이미 사용됐거나 만료된 쿠폰입니다"),
+    COUPON_IS_NOT_AVAILABLE(BAD_REQUEST, "205", "쿠폰을 사용할 수 없습니다."),
     CUSTOMER_COUPON_DOES_NOT_EXIST(NOT_FOUND, "206", "회원 쿠폰이 존재하지 않습니다."),
+
 
     // event
 }

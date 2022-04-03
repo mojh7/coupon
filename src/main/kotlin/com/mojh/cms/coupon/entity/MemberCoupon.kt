@@ -2,7 +2,7 @@ package com.mojh.cms.coupon.entity
 
 import com.mojh.cms.common.BaseEntity
 import com.mojh.cms.common.exception.CouponApplicationException
-import com.mojh.cms.common.exception.ErrorCode.HAS_ALREADY_BEEN_USED_OR_EXPIRED
+import com.mojh.cms.common.exception.ErrorCode.COUPON_IS_NOT_AVAILABLE
 import com.mojh.cms.member.entity.Member
 import org.springframework.security.access.AccessDeniedException
 import java.time.LocalDateTime
@@ -20,14 +20,14 @@ class MemberCoupon protected constructor(
 
     @ManyToOne
     @JoinColumn(name = "coupon_id", nullable = false)
-    var coupon: Coupon = coupon
-        protected set
+    val coupon: Coupon = coupon
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     var status: Status = Status.ISSUED
         protected set
 
+    @Column
     var usedAt: LocalDateTime? = null
         protected set
 
@@ -52,16 +52,20 @@ class MemberCoupon protected constructor(
     }
 
     fun use(customer: Member) {
-        verifyOwner(customer)
-        if (!isAvailable()) {
-            throw CouponApplicationException(HAS_ALREADY_BEEN_USED_OR_EXPIRED)
+        if (isOwner(customer)) {
+            throw AccessDeniedException("해당 쿠폰을 소유한 회원이 아닙니다")
         }
+        if (!isAvailable()) {
+            throw CouponApplicationException(COUPON_IS_NOT_AVAILABLE)
+        }
+
         status = Status.USED
+        usedAt = LocalDateTime.now()
     }
 
-    private fun verifyOwner(customer: Member): Boolean {
+    private fun isOwner(customer: Member): Boolean {
         if (!this.customer.equals(customer)) {
-            throw AccessDeniedException("해당 쿠폰을 소유한 회원이 아닙니다")
+            return false
         }
         return true
     }
