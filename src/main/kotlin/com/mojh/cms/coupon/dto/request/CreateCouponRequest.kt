@@ -1,5 +1,6 @@
 package com.mojh.cms.coupon.dto.request
 
+import com.mojh.cms.common.embeddable.Period
 import com.mojh.cms.coupon.entity.Coupon
 import com.mojh.cms.member.entity.Member
 import java.time.LocalDateTime
@@ -24,12 +25,11 @@ data class CreateCouponRequest(
     @field:NotNull
     val endAt: LocalDateTime
 ) {
-    fun toEntity(admin: Member) = Coupon(
-        seller = admin,
+    fun toCoupon(seller: Member) = Coupon(
+        seller = seller,
         title = this.title,
         description = this.description,
         maxCount = this.maxCount,
-        startAt = this.startAt,
-        endAt = this.endAt
+        availablePeriod = Period(this.startAt, this.endAt)
     )
 }

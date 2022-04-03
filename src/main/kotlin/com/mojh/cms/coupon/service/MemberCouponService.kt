@@ -1,23 +1,29 @@
 package com.mojh.cms.coupon.service
 
-import com.mojh.cms.coupon.repository.CouponRepository
+import com.mojh.cms.common.exception.CouponApplicationException
+import com.mojh.cms.common.exception.ErrorCode.CUSTOMER_COUPON_DOES_NOT_EXIST
+import com.mojh.cms.coupon.dto.response.MemberCouponResponse
 import com.mojh.cms.coupon.repository.MemberCouponRepository
-import org.redisson.api.RedissonClient
+import com.mojh.cms.member.entity.Member
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class MemberCouponService(
-    private val couponRepository: CouponRepository,
     private val memberCouponRepository: MemberCouponRepository,
-    private val redisson: RedissonClient,
-    private val transactionManager: PlatformTransactionManager
 ) {
 
-/*
-    TODO : 사용가능한 쿠폰 조회
-    TODO : 사용 및 만료된 쿠폰 조회
-    TODO : 해당 쿠폰 조회
-    TODO : 쿠폰 사용
-     */
+    fun findAllAvailableCoupons(customer: Member): List<MemberCouponResponse> {
+        return memberCouponRepository.findAllByCustomerId(customer.id!!)
+            .filter { it.isAvailable() }
+            .map { MemberCouponResponse.from(it) }
+    }
+
+    @Transactional
+    fun useCoupon(memberCouponId: Long, customer: Member) {
+        val memberCoupon = memberCouponRepository.findByIdOrNull(memberCouponId)
+            ?: throw CouponApplicationException(CUSTOMER_COUPON_DOES_NOT_EXIST)
+        memberCoupon.use(customer)
+    }
 }

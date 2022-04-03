@@ -4,7 +4,6 @@ import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.coupon.dto.request.CreateCouponRequest
 import com.mojh.cms.coupon.dto.response.MemberCouponResponse
-import com.mojh.cms.coupon.dto.response.toMemberCouponResponse
 import com.mojh.cms.coupon.entity.MemberCoupon
 import com.mojh.cms.coupon.repository.CouponRepository
 import com.mojh.cms.coupon.repository.MemberCouponRepository
@@ -40,7 +39,7 @@ class CouponService(
 
     @Transactional
     fun createCoupon(createCouponRequest: CreateCouponRequest, seller: Member): Long? {
-        val coupon = couponRepository.save(createCouponRequest.toEntity(seller))
+        val coupon = couponRepository.save(createCouponRequest.toCoupon(seller))
         return coupon.id
     }
 
@@ -88,7 +87,7 @@ class CouponService(
                 memberCouponRepository.save(memberCoupon)
 
                 transactionManager.commit(status)
-                result = memberCoupon.toMemberCouponResponse()
+                result = MemberCouponResponse.from(memberCoupon)
                 LOGGER.info("쿠폰 발급 성공")
             } catch (ex: Exception) {
                 transactionManager.rollback(status)

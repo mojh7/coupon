@@ -57,7 +57,7 @@ internal class CouponServiceTest {
         @Test
         fun `성공`() {
             // given
-            val coupon = request.toEntity(seller);
+            val coupon = request.toCoupon(seller);
             every { couponRepository.save(coupon) } returns coupon
 
             // when

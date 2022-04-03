@@ -1,6 +1,7 @@
 package com.mojh.cms.coupon.entity
 
 import com.mojh.cms.common.BaseEntity
+import com.mojh.cms.common.embeddable.Period
 import com.mojh.cms.event.entity.Event
 import com.mojh.cms.member.entity.Member
 import org.springframework.security.access.AccessDeniedException
@@ -14,13 +15,11 @@ class Coupon(
     title: String,
     description: String = "",
     maxCount: Int,
-    startAt: LocalDateTime,
-    endAt: LocalDateTime
+    availablePeriod: Period,
 ) : BaseEntity() {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    var seller: Member = seller
-        protected set
+    val seller: Member = seller
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = true)
@@ -45,22 +44,24 @@ class Coupon(
         protected set
 
     @Column(nullable = false)
-    var startAt: LocalDateTime = startAt
-        protected set
-
-    @Column(updatable = false)
-    var endAt: LocalDateTime = endAt
-        protected set
+    var availablePeriod: Period = availablePeriod
 
     enum class Status {
         CREATED, ENABLED, DISABLED
     }
 
+    fun isAvailable(): Boolean {
+        val now = LocalDateTime.now()
+        if (status != Status.ENABLED || !availablePeriod.contains(now)) {
+            return false
+        }
+        return true
+    }
+
     fun enable(seller: Member) {
         if (!seller.isSeller()) {
-            throw AccessDeniedException("Seller만 쿠폰을 활성화 할 수 있습니다.")
+            throw AccessDeniedException("판매자만 쿠폰을 활성화 할 수 있습니다.")
         }
-
         status = Status.ENABLED
     }
 }
