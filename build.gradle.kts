@@ -46,6 +46,9 @@ dependencies {
     // redis(redisson)
     implementation("org.redisson:redisson-spring-boot-starter:3.16.7")
 
+    // embedded-redis
+    implementation ("it.ozimov:embedded-redis:0.7.2")
+
     // h2
     implementation("com.h2database:h2")
 
