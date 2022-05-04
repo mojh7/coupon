@@ -9,14 +9,16 @@ import javax.annotation.PreDestroy
 @Profile(value = ["local", "test"])
 @Configuration
 class EmbeddedRedisConfig {
-    //@Value("\${spring.redis.port}")
-    //private val redisPort = 0
-    private var redisServer: RedisServer? = null
+    companion object {
+        private var redisServer: RedisServer? = null
+    }
 
     @PostConstruct
     fun redisServer() {
-        redisServer = RedisServer(6379)
-        redisServer?.start()
+        if (redisServer == null) {
+            redisServer = RedisServer()
+            redisServer!!.start()
+        }
     }
 
     @PreDestroy
