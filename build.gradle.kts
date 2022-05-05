@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "2.5.8"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("org.asciidoctor.convert") version "1.5.8"
+    id ("org.sonarqube") version "3.2.0"
     kotlin("jvm") version "1.5.32"
     kotlin("plugin.spring") version "1.5.32"
     kotlin("plugin.jpa") version "1.5.32"
