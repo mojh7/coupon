@@ -17,7 +17,7 @@ pipeline {
             }
         }
 
-        state(SonarQube analysis) {
+        state('SonarQube Analysis') {
             withSonarQubeEnv('SonarQubeServer') {
                 sh "./gradlew sonarqube \
                 -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} \
@@ -28,7 +28,7 @@ pipeline {
             echo 'SonarQube analysis success'
         }
 
-        stage("Quality Gate") {
+        stage('Quality Gate') {
             echo '1'
             steps {
                 timeout(time: 1, unit: 'HOURS') {
