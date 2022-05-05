@@ -1,3 +1,4 @@
+#!groovy
 pipeline {
     agent any
 
@@ -18,26 +19,26 @@ pipeline {
         }
 
         state('SonarQube Analysis') {
-            withSonarQubeEnv('SonarQubeServer') {
-                sh "./gradlew sonarqube \
-                -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} \
-                -Dsonar.host.url=${env.SONAR_HOST_URL} \
-                -Dsonar.login=${env.SONAR_AUTH_TOKEN}"
-                echo 'SonarQube analysis'
+            steps {
+                withSonarQubeEnv('SonarQubeServer') {
+                    sh "./gradlew sonarqube \
+                    -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} \
+                    -Dsonar.host.url=${env.SONAR_HOST_URL} \
+                    -Dsonar.login=${env.SONAR_AUTH_TOKEN}"
+                    echo 'SonarQube analysis'
+                }
+                echo 'SonarQube analysis success'
             }
-            echo 'SonarQube analysis success'
         }
 
         stage('Quality Gate') {
-            echo '1'
             steps {
                 timeout(time: 1, unit: 'HOURS') {
-                    echo '3'
+                    echo '1'
                     waitForQualityGate abortPipeline: true
-                    echo '4'
+                    echo '2'
                 }
             }
-            echo '2'
         }
     }
 
