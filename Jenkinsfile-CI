@@ -33,8 +33,12 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    waitForQualityGate abortPipeline: true
+                timeout(time: 5, unit: 'MINUTES') {
+                    qualityGate = waitForQualityGate()
+                    if (qualityGate.status != "OK") {
+                        echo 'Quality Gate failure'
+                        currentBuild.result = "FAILURE"
+                    }
                 }
             }
         }
