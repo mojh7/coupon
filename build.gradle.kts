@@ -122,7 +122,7 @@ tasks.jacocoTestReport {
         csv.isEnabled = false
 
         html.destination = file("$buildDir/jacoco/jacocoHtml")
-        xml.destination = file("$buildDir/jacoco/jacoco.xml")
+        xml.destination = file("$buildDir/jacoco/jacocoTest.xml")
     }
 }
 
