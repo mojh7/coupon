@@ -3,6 +3,12 @@ pipeline {
     agent any
 
     stages {
+        stage('git checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
