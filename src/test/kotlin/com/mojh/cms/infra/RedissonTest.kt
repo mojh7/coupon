@@ -1,6 +1,7 @@
 package com.mojh.cms.infra
 
 import com.mojh.cms.common.BaseTest
+import com.mojh.cms.common.config.EmbeddedRedisConfig
 import com.mojh.cms.common.config.RedissonConfig
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -9,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import java.util.concurrent.TimeUnit
 
 @BaseTest
-@SpringBootTest(classes = [RedissonConfig::class])
+@SpringBootTest(classes = [RedissonConfig::class, EmbeddedRedisConfig::class])
 class RedissonTest(private val redisson: RedissonClient) {
 
     @Test

@@ -1,6 +1,7 @@
 package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.BaseTest
+import com.mojh.cms.common.config.EmbeddedRedisConfig
 import com.mojh.cms.common.config.RedissonConfig
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
@@ -15,15 +16,13 @@ import io.kotest.matchers.string.shouldHaveLength
 import io.kotest.matchers.string.shouldHaveMinLength
 import io.kotest.matchers.string.shouldStartWith
 import org.redisson.api.RSetCache
-import org.redisson.api.RedissonClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.util.StringUtils
 
 @BaseTest
-@SpringBootTest(classes = [JwtTokenUtils::class, RedissonConfig::class])
+@SpringBootTest(classes = [RedissonConfig::class, EmbeddedRedisConfig::class, JwtTokenUtils::class])
 internal class JwtTokenUtilsTest(
-    private val jwtTokenUtils: JwtTokenUtils,
-    private val redisson: RedissonClient
+    private val jwtTokenUtils: JwtTokenUtils
 ) : FunSpec() {
 
     companion object {
