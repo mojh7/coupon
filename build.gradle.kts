@@ -8,6 +8,7 @@ plugins {
     kotlin("jvm") version "1.5.32"
     kotlin("plugin.spring") version "1.5.32"
     kotlin("plugin.jpa") version "1.5.32"
+    jacoco
 }
 
 group = "com.mojh"
@@ -99,11 +100,57 @@ extra["kotlin-coroutines.version"] = "1.6.0"
 
 tasks.test {
     project.property("snippetsDir")?.let { outputs.dir(it) }
+
+    extensions.configure(JacocoTaskExtension::class) {
+        setDestinationFile(file("$buildDir/jacoco/jacoco.exec"))
+    }
 }
 
 tasks.asciidoctor {
     project.property("snippetsDir")?.let { inputs.dir(it) }
     dependsOn(tasks.test)
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+tasks.jacocoTestReport {
+    reports {
+        html.isEnabled = true
+        xml.isEnabled = true
+        csv.isEnabled = false
+
+        html.destination = file("$buildDir/jacoco/jacocoHtml")
+        xml.destination = file("$buildDir/jacoco/jacoco.xml")
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = "CLASS"
+
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = 0.00.toBigDecimal()
+            }
+
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = 0.00.toBigDecimal()
+            }
+        }
+    }
+}
+
+sonarqube {
+    properties {
+        property ("sonar.java.binaries", "$buildDir/classes/java/main,$buildDir/classes/kotlin/main")
+        property ("sonar.coverage.jacoco.xmlReportPaths", "$buildDir/jacoco/jacocoTest.xml")
+    }
 }
 
 noArg {
