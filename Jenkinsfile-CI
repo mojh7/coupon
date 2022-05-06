@@ -18,6 +18,13 @@ pipeline {
             }
         }
 
+        stage('JacocoTestReport') {
+            steps {
+                sh './gradlew jacocoTestReport'
+                echo 'jacocoTestReport success'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
