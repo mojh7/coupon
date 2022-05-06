@@ -140,7 +140,7 @@ tasks.jacocoTestCoverageVerification {
             limit {
                 counter = "LINE"
                 value = "COVEREDRATIO"
-                minimum = 0.00.toBigDecimal()
+                minimum = 0.75.toBigDecimal()
             }
         }
     }
@@ -148,7 +148,6 @@ tasks.jacocoTestCoverageVerification {
 
 sonarqube {
     properties {
-        property ("sonar.java.binaries", "$buildDir/classes/java/main,$buildDir/classes/kotlin/main")
         property ("sonar.coverage.jacoco.xmlReportPaths", "$buildDir/jacoco/jacocoTest.xml")
     }
 }

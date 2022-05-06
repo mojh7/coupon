@@ -18,10 +18,10 @@ pipeline {
             }
         }
 
-        stage('JacocoTestReport') {
+        stage('Jacoco') {
             steps {
-                sh './gradlew jacocoTestReport'
-                echo 'jacocoTestReport success'
+                sh './gradlew jacocoTestReport jacocoTestCoverageVerification'
+                echo 'jacoco success'
             }
         }
 
