@@ -1,0 +1,76 @@
+#!groovy
+pipeline {
+    agent any
+
+    environment {
+            IMAGE_NAME = ${env.IMAGE_NAME}
+            REGISTRY_CREDENTIAL = 'docker-hub'
+            dockerImage = ''
+        }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'chmod +x gradlew'
+                sh './gradlew clean build --exclude-task test --exclude-task asciidoctor'
+                echo 'build success'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh './gradlew test'
+                echo 'test success'
+            }
+        }
+
+        stage('Build docker image') {
+            steps {
+                echo 'docker build'
+
+                script {
+                    dockerImage = docker.build(IMAGE_NAME)
+                }
+            }
+        }
+
+        stage('Push docker image') {
+            steps {
+                echo 'docker push'
+
+                script {
+                    docker.withRegistry('', REGISTRY_CREDENTIAL) {
+                        dockerImage.push(${env.IMAGE_TAG})
+                        dockerImage.push("latest")
+                    }
+                }
+            }
+        }
+
+        stage('Remove unused docker image') {
+            steps {
+                echo 'docker rmi'
+
+                sh "docker rmi $IMAGE_NAME:${env.IMAGE_TAG}"
+                sh "docker rmi $IMAGE_NAME:latest"
+            }
+        }
+
+        // Pulish Over SSH plugin 사용
+        stage('Deploy') {
+            steps {
+                echo ${env.IMAGE_TAG}
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'success'
+            env.IMAGE_TAG += 0.01
+        }
+        failure {
+            echo 'failure'
+        }
+    }
+}
