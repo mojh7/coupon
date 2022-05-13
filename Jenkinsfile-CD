@@ -3,10 +3,9 @@ pipeline {
     agent any
 
     environment {
-            IMAGE_NAME = '${env.IMAGE_NAME}'
-            REGISTRY_CREDENTIAL = 'docker-hub'
-            dockerImage = ''
-        }
+        REGISTRY_CREDENTIAL = 'docker-hub'
+        dockerImage = ''
+    }
 
     stages {
         stage('Build') {
@@ -27,23 +26,23 @@ pipeline {
         stage('Build docker image') {
             steps {
                 echo 'docker build'
-
                 script {
-                    dockerImage = docker.build(IMAGE_NAME)
+                    dockerImage = docker.build("${env.IMAGE_NAME}")
                 }
+                echo 'docker build success'
             }
         }
 
         stage('Push docker image') {
             steps {
                 echo 'docker push'
-
                 script {
                     docker.withRegistry('', REGISTRY_CREDENTIAL) {
-                        dockerImage.push('${env.IMAGE_TAG}')
+                        dockerImage.push("${env.IMAGE_TAG}")
                         dockerImage.push('latest')
                     }
                 }
+                echo 'docker push success'
             }
         }
 
@@ -51,25 +50,24 @@ pipeline {
             steps {
                 echo 'docker rmi'
 
-                sh 'docker rmi $IMAGE_NAME:${env.IMAGE_TAG}'
-                sh 'docker rmi $IMAGE_NAME:latest'
+                sh "docker rmi $IMAGE_NAME:${env.IMAGE_TAG}"
+                sh "docker rmi $IMAGE_NAME:latest"
             }
         }
 
         // Pulish Over SSH plugin 사용
         stage('Deploy') {
             steps {
-                echo '${env.IMAGE_TAG}'
+                echo "${env.IMAGE_TAG}"
             }
         }
     }
 
     post {
         success {
-            steps {
-                echo 'success'
-                env.IMAGE_TAG += 0.01
-                echo '${env.IMAGE_TAG}'
+            echo 'success'
+            script {
+                env.IMAGE_TAG = ${env.IMAGE_TAG} + 0.01
             }
         }
         failure {
