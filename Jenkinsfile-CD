@@ -5,6 +5,8 @@ pipeline {
     environment {
         REGISTRY_CREDENTIAL = 'docker-hub'
         dockerImage = ''
+        CURRENT_DATE = sh(returnStdout: true, script: 'date +%y%m%d')
+        TAG = "$CURRENT_DATE.$BUILD_NUMBER"
     }
 
     stages {
@@ -27,7 +29,7 @@ pipeline {
             steps {
                 echo 'docker build'
                 script {
-                    dockerImage = docker.build("${env.IMAGE_NAME}")
+                    dockerImage = docker.build("$IMAGE_NAME")
                 }
                 echo 'docker build success'
             }
@@ -38,7 +40,7 @@ pipeline {
                 echo 'docker push'
                 script {
                     docker.withRegistry('', REGISTRY_CREDENTIAL) {
-                        dockerImage.push("${env.IMAGE_TAG}")
+                        dockerImage.push("$TAG")
                         dockerImage.push('latest')
                     }
                 }
@@ -49,8 +51,7 @@ pipeline {
         stage('Remove unused docker image') {
             steps {
                 echo 'docker rmi'
-
-                sh "docker rmi $IMAGE_NAME:${env.IMAGE_TAG}"
+                sh "docker rmi $IMAGE_NAME:$TAG"
                 sh "docker rmi $IMAGE_NAME:latest"
             }
         }
@@ -58,7 +59,7 @@ pipeline {
         // Pulish Over SSH plugin 사용
         stage('Deploy') {
             steps {
-                echo "${env.IMAGE_TAG}"
+                echo "$TAG"
             }
         }
     }
@@ -66,9 +67,6 @@ pipeline {
     post {
         success {
             echo 'success'
-            script {
-                env.IMAGE_TAG = ${env.IMAGE_TAG} + 0.01
-            }
         }
         failure {
             echo 'failure'
