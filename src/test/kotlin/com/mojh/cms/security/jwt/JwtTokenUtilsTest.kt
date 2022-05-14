@@ -1,7 +1,6 @@
 package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.BaseTest
-import com.mojh.cms.common.config.EmbeddedRedisConfig
 import com.mojh.cms.common.config.RedissonConfig
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
@@ -20,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.util.StringUtils
 
 @BaseTest
-@SpringBootTest(classes = [RedissonConfig::class, EmbeddedRedisConfig::class, JwtTokenUtils::class])
+@SpringBootTest(classes = [RedissonConfig::class, JwtTokenUtils::class])
 internal class JwtTokenUtilsTest(
     private val jwtTokenUtils: JwtTokenUtils
 ) : FunSpec() {
