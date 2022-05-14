@@ -4,14 +4,15 @@ pipeline {
 
     environment {
         REGISTRY_CREDENTIAL = 'docker-hub'
-        dockerImage = ''
-        CURRENT_DATE = sh(returnStdout: true, script: 'date +%y%m%d')
+        CURRENT_DATE = sh(returnStdout: true, script: 'date +%y%m%d').trim()
         TAG = "$CURRENT_DATE.$BUILD_NUMBER"
+        dockerImage = ''
     }
 
     stages {
         stage('Build') {
             steps {
+                echo "$TAG"
                 sh 'chmod +x gradlew'
                 sh './gradlew clean build --exclude-task test --exclude-task asciidoctor'
                 echo 'build success'
@@ -59,7 +60,7 @@ pipeline {
         // Pulish Over SSH plugin 사용
         stage('Deploy') {
             steps {
-                echo "$TAG"
+                echo 'deploy'
             }
         }
     }
