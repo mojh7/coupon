@@ -1,0 +1,24 @@
+server:
+  address: 0.0.0.0
+  port: 8080
+
+logging:
+  config: classpath:log4j2.yml
+  level:
+    org:
+      hibernate:
+        type:
+          descriptor:
+            sql: trace
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    show-sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
