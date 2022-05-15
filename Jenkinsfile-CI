@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('build') {
             steps {
                 sh 'chmod +x gradlew'
                 sh './gradlew clean build --exclude-task test --exclude-task asciidoctor'
@@ -11,21 +11,21 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('test') {
             steps {
                 sh './gradlew test'
                 echo 'test success'
             }
         }
 
-        stage('Jacoco') {
+        stage('jacoco') {
             steps {
                 sh './gradlew jacocoTestReport jacocoTestCoverageVerification'
                 echo 'jacoco success'
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('sonarqube analysis') {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
                     sh "./gradlew sonarqube \
@@ -34,11 +34,11 @@ pipeline {
                     -Dsonar.login=${env.SONAR_AUTH_TOKEN}"
                     echo 'SonarQube analysis'
                 }
-                echo 'SonarQube analysis success'
+                echo 'sonarqube analysis success'
             }
         }
 
-        stage('Quality Gate') {
+        stage('quality gate') {
             steps {
                 script {
                     timeout(time: 5, unit: 'MINUTES') {
@@ -50,6 +50,7 @@ pipeline {
                         }
                     }
                 }
+                echo 'quality gate success'
             }
         }
     }
