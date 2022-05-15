@@ -19,19 +19,17 @@ class RedissonConfig(private val environment: Environment) {
     // profile local 혹은 test 일 때 embedded redis 사용
     @PostConstruct
     fun redisServer() {
+        var connectsEmbeddedRedis: Boolean = false
         for (profileName in environment.activeProfiles) {
-            println(profileName)
-            if (!(profileName.equals("local") || profileName.equals("test"))) {
-                continue;
+            if (profileName.equals("local") || profileName.equals("test")) {
+                connectsEmbeddedRedis = true
+                break;
             }
+        }
 
-            println(redisServer)
-            if (redisServer == null) {
-                redisServer = RedisServer()
-                redisServer!!.start()
-            }
-            println(redisServer)
-            break;
+        if (connectsEmbeddedRedis && redisServer == null) {
+            redisServer = RedisServer()
+            redisServer!!.start()
         }
     }
 
