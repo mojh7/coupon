@@ -102,14 +102,4 @@ class CouponService(
 
         return result ?: throw CouponApplicationException(ErrorCode.COUPON_DOWNLOAD_FAILED)
     }
-
-    /*
-    TODO : 쿠폰 정보 전체 조회
-    TODO : 해당 admin이 생성한 쿠폰 정보 전체 조회
-    TODO : 해당 쿠폰 정보 조회
-     
-    TODO : 쿠폰 정보 활성화
-    TODO : 쿠폰 정보 비활성화
-    TODO : 쿠폰 정보 삭제
-     */
 }
