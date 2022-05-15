@@ -1,0 +1,99 @@
+#!groovy
+def publishOverSSH(SERVER_CONFIG_NAME) {
+    sshPublisher(
+        continueOnError: false, // 서버에 문제 발생 시 진행 여부
+        failOnError: true, // 서버에 배포시 문제가 생기면 빌드 실패로 표시 여부
+        publishers:[
+            sshPublisherDesc(
+                configName: "${SERVER_CONFIG_NAME}",
+                verbose: true,
+                transfers: [
+                    sshTransfer(
+                        execCommand: "sh deploy.sh"
+                    )
+                ]
+            )
+        ]
+    )
+}
+
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY_CREDENTIAL = 'docker-hub'
+        CURRENT_DATE = sh(returnStdout: true, script: 'date +%y%m%d').trim()
+        TAG = "$CURRENT_DATE.$BUILD_NUMBER"
+        dockerImage = ''
+    }
+
+    stages {
+        stage('build') {
+            steps {
+                sh 'chmod +x gradlew'
+                sh './gradlew clean build --exclude-task test --exclude-task asciidoctor'
+                echo 'build success'
+            }
+        }
+
+        stage('test') {
+            steps {
+                sh './gradlew test'
+                echo 'test success'
+            }
+        }
+
+        stage('build docker image') {
+            steps {
+                script {
+                    dockerImage = docker.build("$IMAGE_NAME")
+                }
+                echo 'build docker image success'
+            }
+        }
+
+        stage('push docker image') {
+            steps {
+                script {
+                    docker.withRegistry('', REGISTRY_CREDENTIAL) {
+                        dockerImage.push("$TAG")
+                        dockerImage.push('latest')
+                    }
+                }
+                echo 'push docker image success'
+            }
+        }
+
+        stage('remove unused docker image') {
+            steps {
+                sh "docker rmi $IMAGE_NAME:$TAG"
+                sh "docker rmi $IMAGE_NAME:latest"
+                echo 'docker rmi success'
+            }
+        }
+
+        // Pulish Over SSH plugin 사용
+        stage('deploy') {
+            steps {
+                script {
+                    def serverList = ["web1", "web2"]
+                    for (server in serverList) {
+                        stage(server) {
+                            publishOverSSH(server)
+                        }
+                    }
+                }
+                echo 'deploy success'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'success'
+        }
+        failure {
+            echo 'failure'
+        }
+    }
+}
