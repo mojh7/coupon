@@ -7,6 +7,10 @@ val PERMIT_ALL_GET_URI = arrayOf(
     "/pause"
 )
 
+val PERMIT_ALL_HEAD_URI = arrayOf(
+    "/actuator/**",
+)
+
 val PERMIT_ALL_POST_URI = arrayOf(
     "/member/signup",
     "/auth/login",
