@@ -5,6 +5,14 @@ spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
 
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  shutdown: graceful
+
 coupon:
   lock-key-prefix: 'CRL:'
   count-key-prefix: 'CC:'
