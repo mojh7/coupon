@@ -9,7 +9,7 @@ def publishOverSSH(SERVER_CONFIG_NAME) {
                 verbose: true,
                 transfers: [
                     sshTransfer(
-                        execCommand: "sh deploy.sh"
+                        execCommand: "bash deploy.sh"
                     )
                 ]
             )
