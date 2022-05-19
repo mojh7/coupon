@@ -24,11 +24,13 @@ class JwtAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : Auth
     override fun commence(request: HttpServletRequest,
                           response: HttpServletResponse,
                           authException: AuthenticationException) {
-        val responseBody = request.getAttribute(AUTH_EXCEPTION_INFO)?.let {
-            val ex = it as CouponApplicationException
+        val ex: CouponApplicationException? = request.getAttribute(AUTH_EXCEPTION_INFO)?.let{
+            it as CouponApplicationException
+        }
+        val responseBody = if (ex != null) {
             LOGGER.warn(ex)
             objectMapper.writeValueAsString(ApiResponse.failed(ex.errorCode))
-        } ?: {
+        } else {
             LOGGER.warn(authException)
             objectMapper.writeValueAsString(ApiResponse.failed(UNAUTHORIZED, authException.message))
         }

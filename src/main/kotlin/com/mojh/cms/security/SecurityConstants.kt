@@ -1,7 +1,14 @@
 package com.mojh.cms.security
 
 val PERMIT_ALL_GET_URI = arrayOf(
-    "/event/**"
+    "/event/**",
+    "/actuator/**",
+    "/hello-world",
+    "/pause"
+)
+
+val PERMIT_ALL_HEAD_URI = arrayOf(
+    "/actuator/**",
 )
 
 val PERMIT_ALL_POST_URI = arrayOf(
