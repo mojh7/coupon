@@ -5,6 +5,7 @@ import com.mojh.cms.common.exception.CouponApplicationException
 import org.apache.logging.log4j.LogManager
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageConversionException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
@@ -30,6 +31,13 @@ class GlobalRestControllerAdvice {
         LOGGER.warn(ex)
         return ResponseEntity.status(BAD_REQUEST)
             .body(ApiResponse.failed(BAD_REQUEST, errors))
+    }
+    
+    @ExceptionHandler(HttpMessageConversionException::class)
+    fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ResponseEntity<ApiResponse<*>> {
+        LOGGER.warn(ex)
+        return ResponseEntity.status(BAD_REQUEST)
+            .body(ApiResponse.failed(BAD_REQUEST, "bad request"))
     }
 
     @ExceptionHandler(CouponApplicationException::class)
