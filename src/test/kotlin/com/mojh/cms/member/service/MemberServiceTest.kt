@@ -20,8 +20,8 @@ internal class MemberServiceTest : BehaviorSpec({
     val passwordEncoder = mockk<PasswordEncoder>()
     val memberService = MemberService(memberRepository, passwordEncoder)
 
-    val ENCODED_PW = "\$2a\$10\$nT0gOH.JjmBi/5vMBIBOPeuk8kbHG4et1KR/3tNtsr/il.Yj0QKBm";
-    val PASSWORD = "123123"
+    val ENCODED_PW = "\$2a\$10\$1h7PIxB8mCORT69vsg1Lve6YFzl/O4k349WrPhlN76BUB905JVQqC";
+    val PASSWORD = "pw12ab31cd23"
 
     isolationMode = IsolationMode.InstancePerTest
 
