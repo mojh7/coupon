@@ -14,8 +14,8 @@ class MemberController(
 ) {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    fun signup(@Valid @RequestBody signupMemberRequest: SignupMemberRequest): ApiResponse<*> {
+    fun signup(@Valid @RequestBody signupMemberRequest: SignupMemberRequest) = run {
         memberService.signup(signupMemberRequest)
-        return ApiResponse.succeed()
+        ApiResponse.succeed()
     }
 }
