@@ -4,8 +4,8 @@ import com.mojh.cms.common.embeddable.Period
 import com.mojh.cms.coupon.entity.Coupon
 import com.mojh.cms.member.entity.Member
 import java.time.LocalDateTime
+import javax.validation.constraints.Min
 import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
 data class CreateCouponRequest(
@@ -16,13 +16,11 @@ data class CreateCouponRequest(
     @field:Size(max = 64)
     val description: String = "",
 
-    @field:Size(min = 0)
+    @field:Min(value = 1)
     val maxCount: Int,
 
-    @field:NotNull
     val startAt: LocalDateTime,
 
-    @field:NotNull
     val endAt: LocalDateTime
 ) {
     fun toCoupon(seller: Member) = Coupon(
