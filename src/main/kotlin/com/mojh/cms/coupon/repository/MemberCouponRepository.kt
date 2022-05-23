@@ -7,4 +7,6 @@ interface MemberCouponRepository : JpaRepository<MemberCoupon, Long> {
     fun findAllByCustomerIdAndCouponId(customerId: Long, couponId: Long): MutableList<MemberCoupon>
 
     fun findAllByCustomerId(customerId: Long): MutableList<MemberCoupon>
+
+    fun countByCouponId(couponId: Long): Long
 }
