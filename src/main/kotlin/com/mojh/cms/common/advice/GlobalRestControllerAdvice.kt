@@ -37,7 +37,7 @@ class GlobalRestControllerAdvice {
     fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ResponseEntity<ApiResponse<*>> {
         LOGGER.warn(ex)
         return ResponseEntity.status(BAD_REQUEST)
-            .body(ApiResponse.failed(BAD_REQUEST, "bad request"))
+            .body(ApiResponse.failed(BAD_REQUEST, "bad request body"))
     }
 
     @ExceptionHandler(CouponApplicationException::class)
@@ -56,6 +56,7 @@ class GlobalRestControllerAdvice {
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ApiResponse<*>> {
+        LOGGER.error(ex.message)
         LOGGER.error(ex.printStackTrace())
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
             .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "internal server error"))

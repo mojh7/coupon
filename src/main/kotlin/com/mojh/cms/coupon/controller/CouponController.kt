@@ -31,6 +31,10 @@ class CouponController(
         return ApiResponse.succeed()
     }
 
+    @GetMapping("/{couponId}/count")
+    fun getActuallyDeployedCouponCount(@PathVariable couponId: Long) = run {
+        ApiResponse.succeed(couponService.getActuallyDeployedCouponCount(couponId))
+    }
 
     @PostMapping("/{couponId}/download")
     @Secured("ROLE_CUSTOMER")

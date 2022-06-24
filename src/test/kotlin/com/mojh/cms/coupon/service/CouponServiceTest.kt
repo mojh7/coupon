@@ -5,66 +5,49 @@ import com.mojh.cms.coupon.dto.request.CreateCouponRequest
 import com.mojh.cms.coupon.repository.CouponRepository
 import com.mojh.cms.coupon.repository.MemberCouponRepository
 import com.mojh.cms.member.entity.Member
+import io.kotest.core.spec.IsolationMode
+import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
 import org.redisson.api.RedissonClient
 import org.springframework.transaction.PlatformTransactionManager
 import java.time.LocalDateTime
 import java.time.Month
 
 @UnitTest
-internal class CouponServiceTest {
-    @MockK
-    private lateinit var couponRepository: CouponRepository
-
-    @MockK
-    private lateinit var memberCouponRepository: MemberCouponRepository
-
-    @MockK
-    private lateinit var redisson: RedissonClient
-
-    @MockK
-    private lateinit var transactionManager: PlatformTransactionManager
-
-    @InjectMockKs
-    private lateinit var couponService: CouponService
-
-    private lateinit var seller: Member;
-
-    @BeforeEach
-    internal fun setUp() {
-        seller = Member("accountId", "pw", Member.Role.ROLE_SELLER)
+internal class CouponServiceTest : BehaviorSpec() {
+    companion object {
+        private val SELLER = Member("sellerId", "password", Member.Role.ROLE_SELLER)
     }
 
-    @DisplayName("쿠폰 정보 생성")
-    @Nested
-    inner class Create {
-        private lateinit var request: CreateCouponRequest
+    init {
+        val couponRepository = mockk<CouponRepository>()
+        val memberCouponRepository = mockk<MemberCouponRepository>()
+        val redisson = mockk<RedissonClient>()
+        val transactionManager = mockk<PlatformTransactionManager>()
+        val couponService = CouponService(couponRepository, memberCouponRepository, redisson, transactionManager)
 
-        @BeforeEach
-        internal fun setUp() {
-            request = CreateCouponRequest("쿠폰 이름", "쿠폰 설명", maxCount = 100
-                , startAt = LocalDateTime.of(2022, Month.MARCH, 3, 14, 0)
-                , endAt = LocalDateTime.of(2022, Month.MARCH, 5, 22, 0))
-        }
+        isolationMode = IsolationMode.InstancePerTest
 
-        @Test
-        fun `성공`() {
-            // given
-            val coupon = request.toCoupon(seller);
+        given("유효한 쿠폰 정보로") {
+            val createCouponRequest = CreateCouponRequest(
+                "쿠폰 이름",
+                "쿠폰 설명",
+                maxCount = 100,
+                startAt = LocalDateTime.of(2022, Month.MARCH, 3, 14, 0),
+                endAt = LocalDateTime.of(2022, Month.MARCH, 5, 22, 0)
+            )
+            val coupon = createCouponRequest.toCoupon(SELLER);
             every { couponRepository.save(coupon) } returns coupon
 
-            // when
-            couponService.createCoupon(request, seller)
+            `when`("쿠폰 정보를 생성하면") {
+                couponService.createCoupon(createCouponRequest, SELLER)
 
-            // then
-            verify (exactly = 1) { couponRepository.save(coupon) }
+                then("요청이 성공하여 쿠폰 정보를 저장한다") {
+                    verify(exactly = 1) { couponRepository.save(coupon) }
+                }
+            }
         }
     }
 }

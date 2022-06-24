@@ -14,6 +14,7 @@ server:
   shutdown: graceful
 
 
+
 coupon:
   lock-key-prefix: 'CRL:'
   count-key-prefix: 'CC:'

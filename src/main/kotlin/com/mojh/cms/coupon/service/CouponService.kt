@@ -52,6 +52,8 @@ class CouponService(
         coupon.enable(seller)
     }
 
+    fun getActuallyDeployedCouponCount(couponId: Long) =
+        memberCouponRepository.countByCouponId(couponId)
 
     fun downloadCoupon(couponId: Long, customer: Member): MemberCouponResponse {
         val couponInfo = couponRepository.findByIdOrNull(couponId)
