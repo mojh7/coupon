@@ -59,6 +59,8 @@ class CouponService(
         val couponInfo = couponRepository.findByIdOrNull(couponId)
             ?: throw CouponApplicationException(ErrorCode.COUPON_DOES_NOT_EXIST)
 
+        if (!couponInfo.isAvailable()) throw CouponApplicationException(ErrorCode.UNABLE_DOWNLOAD_COUPON)
+
         var result: MemberCouponResponse?
 
         val lock: RLock = redisson.getLock(COUPON_RLOCK_KEY_PREFIX + couponId)

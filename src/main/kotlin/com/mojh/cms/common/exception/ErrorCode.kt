@@ -29,7 +29,7 @@ enum class ErrorCode(
     COUPONS_ARE_EXHAUSTED(BAD_REQUEST, "204", "쿠폰이 모두 소진되었습니다."),
     COUPON_IS_NOT_AVAILABLE(BAD_REQUEST, "205", "쿠폰을 사용할 수 없습니다."),
     CUSTOMER_COUPON_DOES_NOT_EXIST(NOT_FOUND, "206", "회원 쿠폰이 존재하지 않습니다."),
-
+    UNABLE_DOWNLOAD_COUPON(CONFLICT, "207", "쿠폰을 받을 수 없습니다")
 
     // event
 }
