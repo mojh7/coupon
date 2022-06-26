@@ -83,7 +83,7 @@ class CouponService(
                 val couponCount = couponCountRBucket.get()
                 if (!couponCountRBucket.isExists || couponCount <= 0) {
                     LOGGER.info("준비된 모든 쿠폰 소진")
-                    throw CouponApplicationException(ErrorCode.COUPONS_ARE_EXHAUSTED)
+                    throw CouponApplicationException(ErrorCode.RUN_OUT_OF_COUPONS)
                 }
 
                 LOGGER.info("coupon 갯수 : $couponCount")
