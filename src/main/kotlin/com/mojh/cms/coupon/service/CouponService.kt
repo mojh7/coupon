@@ -66,6 +66,7 @@ class CouponService(
         val lock: RLock = redisson.getLock(COUPON_RLOCK_KEY_PREFIX + couponId)
 
         try {
+            LOGGER.info("lock 획득 대기")
             if (!lock.tryLock(10, 5, TimeUnit.SECONDS)) {
                 LOGGER.info("lock 획득 실패")
                 throw CouponApplicationException(ErrorCode.DOWNLOAD_COUPON_TIME_OUT)
@@ -92,7 +93,7 @@ class CouponService(
 
                 transactionManager.commit(status)
                 result = MemberCouponResponse.from(memberCoupon)
-                LOGGER.info("쿠폰 발급 성공")
+                LOGGER.info("couponId: ${couponId}, memberId: ${customer.id!!} 쿠폰 발급 성공")
             } catch (ex: Exception) {
                 transactionManager.rollback(status)
                 throw ex
