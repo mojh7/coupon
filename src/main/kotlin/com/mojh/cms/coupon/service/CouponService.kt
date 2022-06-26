@@ -47,7 +47,7 @@ class CouponService(
         val coupon = couponRepository.findByIdOrNull(couponId)
             ?: throw CouponApplicationException(ErrorCode.COUPON_DOES_NOT_EXIST)
 
-        redisson.getBucket<Int>(COUPON_COUNT_KEY_PREFIX + couponId).set(coupon.maxCount)
+        redisson.getBucket<Int>("${COUPON_COUNT_KEY_PREFIX}${couponId}").set(coupon.maxCount)
 
         coupon.enable(seller)
     }
@@ -63,7 +63,7 @@ class CouponService(
 
         var result: MemberCouponResponse?
 
-        val lock: RLock = redisson.getLock(COUPON_RLOCK_KEY_PREFIX + couponId)
+        val lock: RLock = redisson.getLock("${COUPON_RLOCK_KEY_PREFIX}${couponId}")
 
         try {
             LOGGER.info("lock 획득 대기")
