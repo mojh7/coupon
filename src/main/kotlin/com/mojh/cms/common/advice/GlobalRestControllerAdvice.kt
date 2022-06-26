@@ -56,9 +56,8 @@ class GlobalRestControllerAdvice {
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ApiResponse<*>> {
-        LOGGER.error(ex.message)
-        LOGGER.error(ex.printStackTrace())
+        LOGGER.error("internal error", ex)
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-            .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "internal server error"))
+            .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "Internal Server Error"))
     }
 }
