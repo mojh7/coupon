@@ -67,7 +67,7 @@ class CouponService(
 
         try {
             LOGGER.info("lock 획득 대기")
-            if (!lock.tryLock(10, 5, TimeUnit.SECONDS)) {
+            if (!lock.tryLock(30, 3, TimeUnit.SECONDS)) {
                 LOGGER.info("lock 획득 실패")
                 throw CouponApplicationException(ErrorCode.DOWNLOAD_COUPON_TIME_OUT)
             }
