@@ -21,7 +21,8 @@ class RedissonConfig(private val environment: Environment) {
     fun redisServer() {
         var connectsEmbeddedRedis: Boolean = false
         for (profileName in environment.activeProfiles) {
-            if (profileName.equals("local") || profileName.equals("test")) {
+            if (profileName.equals("test")) {
+            // if (profileName.equals("local") || profileName.equals("test")) {
                 connectsEmbeddedRedis = true
                 break;
             }
