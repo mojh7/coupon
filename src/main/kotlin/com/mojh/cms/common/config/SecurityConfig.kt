@@ -28,7 +28,10 @@ class SecurityConfig(
             httpBasic { disable() }
             csrf { disable() }
             sessionManagement { SessionCreationPolicy.STATELESS }
+            // 구체적인 경로를 더 먼저 선언
             authorizeRequests {
+                authorize("/seller/**", hasRole("SELLER"))
+                authorize("/customer/**", hasRole("CUSTOMER"))
                 AUTH_GET_URL.forEach { authorize(HttpMethod.GET, it, authenticated) }
                 AUTH_POST_URL.forEach { authorize(HttpMethod.POST, it, authenticated) }
                 authorize(anyRequest, permitAll)

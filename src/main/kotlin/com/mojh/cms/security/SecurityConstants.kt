@@ -1,12 +1,13 @@
 package com.mojh.cms.security
 
 val AUTH_GET_URL = arrayOf(
-    ""
+    "/customer/**",
 )
 
 val AUTH_POST_URL = arrayOf(
+    "/seller/**",
     "/coupons/**",
-    "/customer/coupons/**",
+    "/customer/**",
 )
 
 const val AUTH_EXCEPTION_INFO = "AUTH_EXCEPTION_INFO"
