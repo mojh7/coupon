@@ -1,21 +1,12 @@
 package com.mojh.cms.security
 
-val PERMIT_ALL_GET_URI = arrayOf(
-    "/event/**",
-    "/actuator/**",
-    "/hello-world",
-    "/pause"
+val AUTH_GET_URL = arrayOf(
+    ""
 )
 
-val PERMIT_ALL_HEAD_URI = arrayOf(
-    "/actuator/**",
-)
-
-val PERMIT_ALL_POST_URI = arrayOf(
-    "/member/signup",
-    "/auth/login",
-    "/auth/logout",
-    "/auth/reissue"
+val AUTH_POST_URL = arrayOf(
+    "/coupons/**",
+    "/customer/coupons/**",
 )
 
 const val AUTH_EXCEPTION_INFO = "AUTH_EXCEPTION_INFO"

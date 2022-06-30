@@ -3,9 +3,8 @@ package com.mojh.cms.security.jwt
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.security.AUTH_EXCEPTION_INFO
-import com.mojh.cms.security.PERMIT_ALL_GET_URI
-import com.mojh.cms.security.PERMIT_ALL_HEAD_URI
-import com.mojh.cms.security.PERMIT_ALL_POST_URI
+import com.mojh.cms.security.AUTH_GET_URL
+import com.mojh.cms.security.AUTH_POST_URL
 import com.mojh.cms.security.service.UserDetailsServiceImpl
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
@@ -53,13 +52,11 @@ class JwtAuthenticationFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         return when(request.method) {
-            HttpMethod.HEAD.toString() -> Arrays.stream(PERMIT_ALL_HEAD_URI)
+            HttpMethod.GET.toString() -> !Arrays.stream(AUTH_GET_URL)
                 .anyMatch { path -> pathMatcher.match(path, request.servletPath) }
-            HttpMethod.GET.toString() -> Arrays.stream(PERMIT_ALL_GET_URI)
+            HttpMethod.POST.toString() -> !Arrays.stream(AUTH_POST_URL)
                 .anyMatch { path -> pathMatcher.match(path, request.servletPath) }
-            HttpMethod.POST.toString() -> Arrays.stream(PERMIT_ALL_POST_URI)
-                .anyMatch { path -> pathMatcher.match(path, request.servletPath) }
-            else -> false
+            else -> true
         }
     }
 }

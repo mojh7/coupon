@@ -1,7 +1,7 @@
 package com.mojh.cms.common.config
 
-import com.mojh.cms.security.PERMIT_ALL_GET_URI
-import com.mojh.cms.security.PERMIT_ALL_POST_URI
+import com.mojh.cms.security.AUTH_GET_URL
+import com.mojh.cms.security.AUTH_POST_URL
 import com.mojh.cms.security.jwt.JwtAuthenticationEntryPoint
 import com.mojh.cms.security.jwt.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
@@ -29,9 +29,9 @@ class SecurityConfig(
             csrf { disable() }
             sessionManagement { SessionCreationPolicy.STATELESS }
             authorizeRequests {
-                PERMIT_ALL_GET_URI.forEach { authorize(HttpMethod.GET, it, permitAll) }
-                PERMIT_ALL_POST_URI.forEach { authorize(HttpMethod.POST, it, permitAll) }
-                authorize(anyRequest, authenticated)
+                AUTH_GET_URL.forEach { authorize(HttpMethod.GET, it, authenticated) }
+                AUTH_POST_URL.forEach { authorize(HttpMethod.POST, it, authenticated) }
+                authorize(anyRequest, permitAll)
             }
             addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             exceptionHandling {
