@@ -21,21 +21,21 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ResponseEntity<ApiResponse<*>> {
+    @ResponseStatus(BAD_REQUEST)
+    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ApiResponse<*> {
         val errors: MutableMap<String, String?> = HashMap()
         ex.bindingResult.allErrors.forEach(Consumer {
                 error: ObjectError -> errors[(error as FieldError).field] = error.getDefaultMessage()
         })
         LOGGER.warn(ex)
-        return ResponseEntity.status(BAD_REQUEST)
-            .body(ApiResponse.failed(BAD_REQUEST, errors))
+        return ApiResponse.failed(errors)
     }
     
     @ExceptionHandler(HttpMessageConversionException::class)
-    fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ResponseEntity<ApiResponse<*>> {
+    @ResponseStatus(BAD_REQUEST)
+    fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ApiResponse<*> {
         LOGGER.warn(ex)
-        return ResponseEntity.status(BAD_REQUEST)
-            .body(ApiResponse.failed(BAD_REQUEST, "Bad request body"))
+        return ApiResponse.failed("Bad request body")
     }
 
     @ExceptionHandler(CouponApplicationException::class)
@@ -49,13 +49,13 @@ class GlobalExceptionHandler {
     @ResponseStatus(FORBIDDEN)
     fun handleAccessDeniedException(ex: AccessDeniedException): ApiResponse<*> {
         LOGGER.warn(ex)
-        return ApiResponse.failed(FORBIDDEN, "Access is denied")
+        return ApiResponse.failed("Access is denied")
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(ex: Exception): ResponseEntity<ApiResponse<*>> {
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    fun handleException(ex: Exception): ApiResponse<*> {
         LOGGER.error("Internal server error", ex)
-        return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-            .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "Internal server error"))
+        return ApiResponse.failed("Internal server error")
     }
 }

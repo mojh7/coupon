@@ -1,7 +1,6 @@
 package com.mojh.cms.common
 
 import com.mojh.cms.common.exception.ErrorCode
-import org.springframework.http.HttpStatus
 
 data class ApiResponse<out T> private constructor(
     val success: Boolean,
@@ -16,14 +15,13 @@ data class ApiResponse<out T> private constructor(
         fun <T> succeed(data: T?): ApiResponse<T> = ApiResponse(true, data, null)
 
         fun failed(errorCode: ErrorCode) =
-            ApiResponse(false, null, ErrorResponse(errorCode.status.value(), errorCode.code, errorCode.message))
+            ApiResponse(false, null, ErrorResponse(errorCode.code, errorCode.message))
 
-        fun <E> failed(status: HttpStatus, message: E) =
-            ApiResponse(false, null, ErrorResponse(status = status.value(), message = message))
+        fun <E> failed(message: E) =
+            ApiResponse(false, null, ErrorResponse(message = message))
     }
 
     private class ErrorResponse<out E> (
-        val status: Int,
         val code: String? = null,
         val message: E?
     )

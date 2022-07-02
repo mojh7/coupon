@@ -32,7 +32,7 @@ class CustomAccessDeniedHandler(
             contentType = MediaType.APPLICATION_JSON_VALUE
             characterEncoding = StandardCharsets.UTF_8.name();
             writer.print(objectMapper.writeValueAsString(
-                ApiResponse.failed(HttpStatus.FORBIDDEN, accessDeniedException.message)))
+                ApiResponse.failed(accessDeniedException.message)))
         }
     }
 }
