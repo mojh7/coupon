@@ -1,7 +1,6 @@
-package com.mojh.cms.common.advice
+package com.mojh.cms.common.exception
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.common.exception.CouponApplicationException
 import org.apache.logging.log4j.LogManager
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity

@@ -1,4 +1,4 @@
-package com.mojh.cms.security.jwt
+package com.mojh.cms.security.exception
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mojh.cms.common.ApiResponse

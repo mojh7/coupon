@@ -4,7 +4,7 @@ import com.mojh.cms.common.ApiResponse
 import com.mojh.cms.coupon.dto.request.CreateCouponRequest
 import com.mojh.cms.coupon.service.CouponService
 import com.mojh.cms.member.entity.Member
-import com.mojh.cms.security.LoginMember
+import com.mojh.cms.security.member.LoginMember
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 

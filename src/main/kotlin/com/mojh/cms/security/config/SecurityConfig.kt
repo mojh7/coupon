@@ -1,9 +1,9 @@
-package com.mojh.cms.common.config
+package com.mojh.cms.security.config
 
 import com.mojh.cms.security.AUTH_GET_URL
 import com.mojh.cms.security.AUTH_POST_URL
 import com.mojh.cms.security.exception.CustomAccessDeniedHandler
-import com.mojh.cms.security.jwt.JwtAuthenticationEntryPoint
+import com.mojh.cms.security.exception.JwtAuthenticationEntryPoint
 import com.mojh.cms.security.jwt.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod

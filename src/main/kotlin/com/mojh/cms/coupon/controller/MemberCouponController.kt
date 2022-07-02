@@ -3,7 +3,7 @@ package com.mojh.cms.coupon.controller
 import com.mojh.cms.common.ApiResponse
 import com.mojh.cms.coupon.service.MemberCouponService
 import com.mojh.cms.member.entity.Member
-import com.mojh.cms.security.LoginMember
+import com.mojh.cms.security.member.LoginMember
 import org.springframework.security.access.annotation.Secured
 import org.springframework.web.bind.annotation.*
 

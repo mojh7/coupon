@@ -1,4 +1,4 @@
-package com.mojh.cms.security
+package com.mojh.cms.security.member
 
 import com.mojh.cms.member.entity.Member
 import org.springframework.security.core.authority.SimpleGrantedAuthority
