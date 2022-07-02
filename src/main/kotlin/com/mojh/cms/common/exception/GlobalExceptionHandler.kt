@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class GlobalRestControllerAdvice {
+class GlobalExceptionHandler {
 
     companion object {
         private val LOGGER = LogManager.getLogger()
