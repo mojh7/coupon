@@ -2,12 +2,14 @@ package com.mojh.cms.common.exception
 
 import com.mojh.cms.common.ApiResponse
 import org.apache.logging.log4j.LogManager
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConversionException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -30,7 +32,23 @@ class GlobalExceptionHandler {
         LOGGER.warn(ex)
         return ApiResponse.failed(errors)
     }
-    
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+    fun handleHttpRequestMethodNotSupportedException(
+        ex: HttpRequestMethodNotSupportedException): ResponseEntity<*> {
+        LOGGER.warn(ex)
+        val supportedMethods: MutableSet<HttpMethod>? = ex.supportedHttpMethods
+
+        return if(supportedMethods == null) {
+            ResponseEntity.status(METHOD_NOT_ALLOWED)
+                .body(ApiResponse.failed(ex.message))
+        } else {
+            ResponseEntity.status(METHOD_NOT_ALLOWED)
+                .allow(*supportedMethods.toTypedArray())
+                .body(ApiResponse.failed(ex.message))
+        }
+    }
+
     @ExceptionHandler(HttpMessageConversionException::class)
     @ResponseStatus(BAD_REQUEST)
     fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ApiResponse<*> {
