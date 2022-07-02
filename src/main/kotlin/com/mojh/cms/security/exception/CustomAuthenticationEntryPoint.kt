@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse
 
 
 @Component
-class JwtAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : AuthenticationEntryPoint {
+class CustomAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : AuthenticationEntryPoint {
     companion object {
         private val LOGGER = LogManager.getLogger()
     }
