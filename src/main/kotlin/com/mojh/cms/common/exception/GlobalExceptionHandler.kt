@@ -16,7 +16,6 @@ import java.util.function.Consumer
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-
     companion object {
         private val LOGGER = LogManager.getLogger()
     }
@@ -36,7 +35,7 @@ class GlobalExceptionHandler {
     fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ResponseEntity<ApiResponse<*>> {
         LOGGER.warn(ex)
         return ResponseEntity.status(BAD_REQUEST)
-            .body(ApiResponse.failed(BAD_REQUEST, "bad request body"))
+            .body(ApiResponse.failed(BAD_REQUEST, "Bad request body"))
     }
 
     @ExceptionHandler(CouponApplicationException::class)
@@ -55,8 +54,8 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ApiResponse<*>> {
-        LOGGER.error("internal error", ex)
+        LOGGER.error("Internal server error", ex)
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-            .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "Internal Server Error"))
+            .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "Internal server error"))
     }
 }
