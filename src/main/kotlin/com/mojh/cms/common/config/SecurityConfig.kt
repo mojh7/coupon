@@ -2,6 +2,7 @@ package com.mojh.cms.common.config
 
 import com.mojh.cms.security.AUTH_GET_URL
 import com.mojh.cms.security.AUTH_POST_URL
+import com.mojh.cms.security.exception.CustomAccessDeniedHandler
 import com.mojh.cms.security.jwt.JwtAuthenticationEntryPoint
 import com.mojh.cms.security.jwt.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
@@ -20,7 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(securedEnabled = true)
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
-    private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint
+    private val jwtAuthenticationEntryPoint: JwtAuthenticationEntryPoint,
+    private val customAccessDeniedHandler: CustomAccessDeniedHandler
 ) : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity) {
@@ -39,6 +41,7 @@ class SecurityConfig(
             addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             exceptionHandling {
                 authenticationEntryPoint = jwtAuthenticationEntryPoint
+                accessDeniedHandler = customAccessDeniedHandler
             }
         }
     }
