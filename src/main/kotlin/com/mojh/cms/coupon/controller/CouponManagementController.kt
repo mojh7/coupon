@@ -13,10 +13,14 @@ import javax.validation.Valid
 class CouponManagementController(
     private val couponService: CouponService
 ) {
+    @GetMapping("/{couponId}/count")
+    fun getActuallyDeployedCouponCount(@PathVariable couponId: Long) = run {
+        ApiResponse.succeed(couponService.getActuallyDeployedCouponCount(couponId))
+    }
+
     @PostMapping
     fun createCoupon(@Valid @RequestBody createCouponRequest: CreateCouponRequest,
-                     @LoginMember seller: Member
-    ): ApiResponse<*> {
+                     @LoginMember seller: Member): ApiResponse<*> {
         couponService.createCoupon(createCouponRequest, seller)
         return ApiResponse.succeed()
     }
