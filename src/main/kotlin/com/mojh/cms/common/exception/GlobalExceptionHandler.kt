@@ -1,14 +1,15 @@
-package com.mojh.cms.common.advice
+package com.mojh.cms.common.exception
 
 import com.mojh.cms.common.ApiResponse
-import com.mojh.cms.common.exception.CouponApplicationException
 import org.apache.logging.log4j.LogManager
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageConversionException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -16,28 +17,43 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.util.function.Consumer
 
 @RestControllerAdvice
-class GlobalRestControllerAdvice {
-
+class GlobalExceptionHandler {
     companion object {
         private val LOGGER = LogManager.getLogger()
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ResponseEntity<ApiResponse<*>> {
+    @ResponseStatus(BAD_REQUEST)
+    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ApiResponse<*> {
         val errors: MutableMap<String, String?> = HashMap()
         ex.bindingResult.allErrors.forEach(Consumer {
                 error: ObjectError -> errors[(error as FieldError).field] = error.getDefaultMessage()
         })
         LOGGER.warn(ex)
-        return ResponseEntity.status(BAD_REQUEST)
-            .body(ApiResponse.failed(BAD_REQUEST, errors))
+        return ApiResponse.failed(errors)
     }
-    
-    @ExceptionHandler(HttpMessageConversionException::class)
-    fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ResponseEntity<ApiResponse<*>> {
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+    fun handleHttpRequestMethodNotSupportedException(
+        ex: HttpRequestMethodNotSupportedException): ResponseEntity<*> {
         LOGGER.warn(ex)
-        return ResponseEntity.status(BAD_REQUEST)
-            .body(ApiResponse.failed(BAD_REQUEST, "bad request body"))
+        val supportedMethods: MutableSet<HttpMethod>? = ex.supportedHttpMethods
+
+        return if(supportedMethods == null) {
+            ResponseEntity.status(METHOD_NOT_ALLOWED)
+                .body(ApiResponse.failed(ex.message))
+        } else {
+            ResponseEntity.status(METHOD_NOT_ALLOWED)
+                .allow(*supportedMethods.toTypedArray())
+                .body(ApiResponse.failed(ex.message))
+        }
+    }
+
+    @ExceptionHandler(HttpMessageConversionException::class)
+    @ResponseStatus(BAD_REQUEST)
+    fun handleHttpMessageConversionException(ex: HttpMessageConversionException): ApiResponse<*> {
+        LOGGER.warn(ex)
+        return ApiResponse.failed("Bad request body")
     }
 
     @ExceptionHandler(CouponApplicationException::class)
@@ -51,13 +67,13 @@ class GlobalRestControllerAdvice {
     @ResponseStatus(FORBIDDEN)
     fun handleAccessDeniedException(ex: AccessDeniedException): ApiResponse<*> {
         LOGGER.warn(ex)
-        return ApiResponse.failed(FORBIDDEN, "Access is denied")
+        return ApiResponse.failed("Access is denied")
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(ex: Exception): ResponseEntity<ApiResponse<*>> {
-        LOGGER.error("internal error", ex)
-        return ResponseEntity.status(INTERNAL_SERVER_ERROR)
-            .body(ApiResponse.failed(INTERNAL_SERVER_ERROR, "Internal Server Error"))
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
+    fun handleException(ex: Exception): ApiResponse<*> {
+        LOGGER.error("Internal server error", ex)
+        return ApiResponse.failed("Internal server error")
     }
 }

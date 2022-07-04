@@ -1,4 +1,4 @@
-package com.mojh.cms.security.jwt
+package com.mojh.cms.security.exception
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mojh.cms.common.ApiResponse
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse
 
 
 @Component
-class JwtAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : AuthenticationEntryPoint {
+class CustomAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : AuthenticationEntryPoint {
     companion object {
         private val LOGGER = LogManager.getLogger()
     }
@@ -24,7 +24,7 @@ class JwtAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : Auth
     override fun commence(request: HttpServletRequest,
                           response: HttpServletResponse,
                           authException: AuthenticationException) {
-        val ex: CouponApplicationException? = request.getAttribute(AUTH_EXCEPTION_INFO)?.let{
+        val ex: CouponApplicationException? = request.getAttribute(AUTH_EXCEPTION_INFO)?.let {
             it as CouponApplicationException
         }
         val responseBody = if (ex != null) {
@@ -32,7 +32,7 @@ class JwtAuthenticationEntryPoint(private val objectMapper: ObjectMapper) : Auth
             objectMapper.writeValueAsString(ApiResponse.failed(ex.errorCode))
         } else {
             LOGGER.warn(authException)
-            objectMapper.writeValueAsString(ApiResponse.failed(UNAUTHORIZED, authException.message))
+            objectMapper.writeValueAsString(ApiResponse.failed(authException.message))
         }
 
         with(response) {

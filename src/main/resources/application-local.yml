@@ -43,5 +43,5 @@ management:
 
 jwt:
   secret-key: 'jwttokenlocaltestsecretkey1q2w3e4r!Useasecretkeyofatleast64bytes'
-  access-token-valid-time: 6000000000000 # 테스트용으로 10분
+  access-token-valid-time: 600000 # 테스트용으로 10분
   refresh-token-valid-time: 1200000 # 테스트용으로 20분

@@ -16,9 +16,41 @@
 ## 기술 스택
 
 - Kotlin, Kotest, Mockk
-
-- Spring Boot, Spring Security, Spring Data Jpa
-
+- Spring Boot, Spring Security, Spring Data JPA
 - Mysql, Redis(redisson), Ngrinder, GCP
+- Jenkins, JaCoCo, SonarQube
 
-- Jenkins, Jacoco, Sonarqube
+<br>
+
+## 성능 테스트
+
+API 서버 2대로 부하 분산 중인 GCP 로드밸런서로 요청하여 쿠폰 다운로드 기능 성능 테스트 
+
+- Test를 위한 dummy data table별로 member 50만, member_coupon 500만, coupon 1만 개 넣어두고 테스트 중
+
+### 서버 사양
+
+- API 서버 2대 - 4vCPU RAM 8GB 
+
+- MySQL 서버 1대 - 2vCPU Ram 8GB
+
+- Redis 서버 1대 - 2vCPU Ram 8GB
+
+- Ngrinder Controller 1대 - 2vCPU RAM 4GB
+
+- Ngrinder Agent 4대 - 2vCPU RAM 4GB
+
+<br>
+
+1. vuser = 320, coupon count = 5000
+
+![nr1](./etc/nr1.jpg)
+
+2. vuser = 1600, coupon count = 5000
+
+![nr2](./etc/nr2.jpg)
+
+남은 쿠폰이 있을 때 쿠폰 다운로드 요청은 TPS 100 정도
+
+쿠폰이 모두 소진된 후 들어오는 요청을 처리할 때는 TPS가 170정도 나온다
+

@@ -1,4 +1,4 @@
-package com.mojh.cms.security
+package com.mojh.cms.security.member
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 
