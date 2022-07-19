@@ -12,7 +12,11 @@ server:
       enabled: true
       force: true
   shutdown: graceful
-
+  tomcat:
+    threads:
+      max: 400
+      min-spare: 50
+    accept-count: 200
 
 
 coupon:
