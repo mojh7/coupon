@@ -15,8 +15,8 @@ server:
   tomcat:
     threads:
       max: 400
-      min-spare: 50
-    accept-count: 200
+      min-spare: 100
+    accept-count: 2048
 
 
 coupon:
