@@ -14,9 +14,9 @@ server:
   shutdown: graceful
   tomcat:
     threads:
-      max: 400
-      min-spare: 100
-    accept-count: 2048
+      max: 750
+      min-spare: 200
+    accept-count: 8192
 
 
 coupon:
