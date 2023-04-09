@@ -45,8 +45,9 @@ dependencies {
     // mysql
     runtimeOnly("mysql:mysql-connector-java")
 
-    // redis(redisson)
-    implementation("org.redisson:redisson-spring-boot-starter:3.16.7")
+    // redis
+    implementation ("io.lettuce:lettuce-core:6.1.5")
+    implementation ("org.springframework.boot:spring-boot-starter-data-redis")
 
     // embedded-redis
     implementation ("it.ozimov:embedded-redis:0.7.2")
