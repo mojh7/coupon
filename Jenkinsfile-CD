@@ -1,13 +1,15 @@
 #!groovy
 def ssh(server, cmd) {
-    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-credentials', keyFileVariable: 'SSH_PRIVATE_KEY', usernameVariable: 'REMOTE_USER')]) {
-        def result = sshCommand remote: [
+    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-credentials', keyFileVariable: 'IDENTITY', usernameVariable: 'REMOTE_USER_NAME')]) {
+        result = sshCommand remote: [
+                name: server, 
                 host: server,
-                user: env.REMOTE_USER,
-                key: env.SSH_PRIVATE_KEY
+                user: env.REMOTE_USER_NAME,
+                identityFile: env.IDENTITY,
+                allowAnyHosts: true
         ], command: cmd
-        return result
     }
+    return result
 }
 
 
@@ -32,16 +34,6 @@ pipeline {
             }
         }
 
-        stage('ssh test') {
-            steps {
-                script {
-                    def res = ssh(NGINX_SERVER, "echo 3")
-                    echo $res
-                }
-            }
-        }
-
-        /*
         stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
@@ -236,7 +228,7 @@ pipeline {
                     }
                 }
             }
-        }*/
+        }
     }
 
     post {
