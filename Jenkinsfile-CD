@@ -7,7 +7,7 @@ def ssh(server, cmd) {
                 user: env.REMOTE_USER_NAME,
                 identityFile: env.IDENTITY,
                 allowAnyHosts: true
-        ], command: "echo '$cmd'"
+        ], command: "echo \$($cmd)"
     }
     return result
 }
