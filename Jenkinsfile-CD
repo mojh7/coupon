@@ -34,6 +34,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
@@ -77,13 +78,14 @@ pipeline {
                 echo 'docker rmi success'
             }
         }
+         */
 
         stage('Deploy') {
             steps {
                 script {
                     // 현재 active한 서버 그룹 찾기
                     def nginxConf = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep blue.conf")
-                    def nginxConf2 = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep green.conf")
+                    nginxConf2 = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep green.conf")
 
                     if (nginxConf.contains("blue.conf")) {
                         oldName = 'blue'
