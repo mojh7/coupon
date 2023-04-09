@@ -1,34 +1,31 @@
 #!groovy
-def publishOverSSH(SERVER_CONFIG_NAME) {
-    sshPublisher(
-        continueOnError: false, // 서버에 문제 발생 시 진행 여부
-        failOnError: true, // 서버에 배포시 문제가 생기면 빌드 실패로 표시 여부
-        publishers:[
-            sshPublisherDesc(
-                configName: "${SERVER_CONFIG_NAME}",
-                verbose: true,
-                transfers: [
-                    sshTransfer(
-                        execCommand: "bash deploy.sh"
-                    )
-                ]
-            )
-        ]
-    )
+def ssh(server, cmd) {
+    def result = sshCommand remote: server, command: cmd
+    return result
 }
 
 pipeline {
     agent any
 
     environment {
-        REGISTRY_CREDENTIAL = 'docker-hub'
-        CURRENT_DATE = sh(returnStdout: true, script: 'date +%y%m%d').trim()
-        TAG = "$CURRENT_DATE.$BUILD_NUMBER"
-        dockerImage = ''
+        String REGISTRY_CREDENTIAL = 'docker-hub'
+        def CURRENT_DATE = sh(returnStdout: true, script: 'date +%y%m%d').trim()
+        String TAG = "$CURRENT_DATE.$BUILD_NUMBER"
+        def dockerImage = ""
+        String oldName = ""
+        String newName = ""
+        def oldGroup = ""
+        def newGroup = ""
     }
 
     stages {
-        stage('build') {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
                 sh './gradlew clean build --exclude-task test --exclude-task asciidoctor'
@@ -36,14 +33,14 @@ pipeline {
             }
         }
 
-        stage('test') {
+        stage('Test') {
             steps {
                 sh './gradlew test'
                 echo 'test success'
             }
         }
 
-        stage('build docker image') {
+        stage('Build docker image') {
             steps {
                 script {
                     dockerImage = docker.build("$IMAGE_NAME")
@@ -52,7 +49,7 @@ pipeline {
             }
         }
 
-        stage('push docker image') {
+        stage('Push docker image') {
             steps {
                 script {
                     docker.withRegistry('', REGISTRY_CREDENTIAL) {
@@ -64,7 +61,7 @@ pipeline {
             }
         }
 
-        stage('remove unused docker image') {
+        stage('Remove unused docker image') {
             steps {
                 sh "docker rmi $IMAGE_NAME:$TAG"
                 sh "docker rmi $IMAGE_NAME:latest"
@@ -72,28 +69,165 @@ pipeline {
             }
         }
 
-        // Pulish Over SSH plugin 사용
-        stage('deploy') {
+        stage('Deploy') {
             steps {
                 script {
-                    def serverList = ["web1", "web2"]
-                    for (server in serverList) {
-                        stage(server) {
-                            publishOverSSH(server)
+                    // 현재 active한 서버 그룹 찾기
+                    def nginxConf = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep blue.conf")
+                    def nginxConf2 = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep green.conf")
+
+                    if (nginxConf.contains("blue.conf")) {
+                        oldName = 'blue'
+                        newName = 'green'
+                        oldGroup = env.BLUE_GROUP.split(' ')
+                        newGroup = env.GREEN_GROUP.split(' ')
+                    } else if(nginxConf2.contains("green.conf")) {
+                        oldName = 'green'
+                        newName = 'blue'
+                        oldGroup = env.GREEN_GROUP.split(' ')
+                        newGroup = env.BLUE_GROUP.split(' ')
+                    } else {
+                        error('Nginx configuration error')
+                    }
+
+                    // 새로 배포될 서버 그룹에 속한 서버 배포
+                    newGroup.each { server ->
+                        echo "deploy $server"
+                        ssh(server, "docker-compose up -d")
+                    }
+
+                    // 서버 상태 체크
+                    def interval = 6
+                    def maxTries = 10
+                    def success = false
+                    echo "health check"
+
+                    for (int idx = 1; idx <= maxTries; idx++) {
+                        echo "wait {$interval}s"
+                        sleep interval
+                        echo "$idx : health check"
+
+                        def cnt = 0;
+                        for(server in newGroup) {
+                            def res = ssh(server, "docker-compose ps | grep \"(healthy)\"")
+                            if(res == '') {
+                                echo "$server unhealthy"
+                                continue
+                            } else {
+                                echo "$server healthy"
+                                cnt++;
+                            }
+                        }
+
+                        if(cnt == newGroup.size()) {
+                            success = true
+                            break;
                         }
                     }
+
+                    // 서버 배포 도중 실패, 롤백
+                    if(res == false) {
+                        newGroup.each { server ->
+                            echo "stop $server"
+                            ssh(server, "docker-compose stop")
+                        }
+
+                        error('Deploy failure')
+                    }
                 }
-                echo 'deploy success'
+                echo 'Deploy success'
+            }
+        }
+
+        stage('Switch') {
+            steps {
+                script {
+                    // blue, green 서버들 ip conf 수정
+                    def upstreamFirstLine = "upstream api-server {\n"
+                    def oldGroupConf = upstreamFirstLine
+                    for (def idx = 0; idx < oldGroup.length; idx++) {
+                        oldGroupConf += "    server ${oldGroup[idx]}:8080;\n"
+                    }
+                    oldGroupConf += "}"
+
+                    def newGroupConf = upstreamFirstLine
+                    for (def idx = 0; idx < newGroup.length; idx++) {
+                        newGroupConf += "    server ${newGroup[idx]}:8080;\n"
+                    }
+                    newGroupConf += "}"
+
+                    // blue.conf, green.conf 수정
+                    // nginx.conf 내에 upstream 변경, blue.conf <-> green.conf 수정
+                    ssh(env.NGINX_SERVER, "echo ${oldGroupConf}' > ~/nginx/${oldName}.conf\n" +
+                            "\"echo ${newGroupConf}' > ~/nginx/${newName}.conf\n" +
+                            "sed -i 's/${oldName}.conf/${newName}.conf/g' ~/nginx/nginx.conf")
+
+                    sleep 1
+                    def nginxConfState = ssh(NGINX_SERVER, "docker exec -t nginx nginx -t | grep ok")
+                    if(nginxConfState == "") {
+                        error('Nginx configuration error')
+                    }
+
+                    echo("nginx reload")
+                    ssh(NGINX_SERVER, "docker exec nginx nginx -s reload")
+
+                    // 새롭게 배포한 서버 상태 모니터링
+                    def interval = 6
+                    def maxTries = 10
+                    def success = true
+
+                    for (int idx = 1; idx <= maxTries; idx++) {
+                        echo "wait {$interval}s"
+                        sleep interval
+                        echo "$idx : health check"
+
+                        for(server in newGroup) {
+                            def res = ssh(server, "docker-compose ps | grep \"(healthy)\"")
+                            if(res == '') {
+                                echo "$server unhealthy"
+                                success = false
+                                break;
+                            }
+                        }
+
+                        if(success == false) {
+                            break;
+                        }
+                    }
+
+                    // 새롭게 배포한 서버 서비스 도중 문제 발생시 배포 실패
+                    if(success == false) {
+                        error('Switch failure')
+                    }
+                }
+                echo 'Switch success'
+            }
+
+            post {
+                failure {
+                    script {
+                        // 서버 배포 중 에러가 발생하여 새로 배포했던 서버들 모두 stop
+                        newGroup.each { server ->
+                            echo "stop $server"
+                            ssh(server, "docker-compose stop")
+                        }
+
+                        // nginx.conf upstream 설정 바꾼 것 롤백
+                        echo("rollback nginx conf")
+                        ssh(env.NGINX_SERVER, "sed -i 's/${newName}.conf/${oldName}.conf/g' ~/nginx/nginx.conf\n" +
+                                "docker exec nginx nginx -s reload")
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'success'
+            echo 'Success'
         }
         failure {
-            echo 'failure'
+            echo 'Failure'
         }
     }
 }
