@@ -1,7 +1,13 @@
 #!groovy
 def ssh(server, cmd) {
-    def result = sshCommand remote: server, command: cmd
-    return result
+    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-credentials', keyFileVariable: 'SSH_PRIVATE_KEY', usernameVariable: 'REMOTE_USER')]) {
+        def result = sshCommand remote: [
+                host: server,
+                user: env.REMOTE_USER,
+                key: env.SSH_PRIVATE_KEY
+        ], command: cmd
+        return result
+    }
 }
 
 pipeline {
