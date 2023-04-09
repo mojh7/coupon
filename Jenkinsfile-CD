@@ -10,6 +10,7 @@ def ssh(server, cmd) {
     }
 }
 
+
 pipeline {
     agent any
 
