@@ -7,7 +7,7 @@ def ssh(server, cmd) {
                 user: env.REMOTE_USER_NAME,
                 identityFile: env.IDENTITY,
                 allowAnyHosts: true
-        ], command: cmd
+        ], command: "echo '$cmd'"
     }
     return result
 }
@@ -85,8 +85,7 @@ pipeline {
                 script {
                     // 현재 active한 서버 그룹 찾기
                     def nginxConf = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep blue.conf")
-                    // nginxConf2 = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep green.conf")
-                    nginxConf2 = ssh(env.NGINX_SERVER, "echo 123")
+                    def nginxConf2 = ssh(env.NGINX_SERVER, "cat ~/nginx/nginx.conf | grep green.conf")
 
                     if (nginxConf.contains("blue.conf")) {
                         oldName = 'blue'
