@@ -1,8 +1,17 @@
 #!groovy
 def ssh(server, cmd) {
-    def result = sshCommand remote: server, command: cmd
+    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-credentials', keyFileVariable: 'IDENTITY', usernameVariable: 'REMOTE_USER_NAME')]) {
+        result = sshCommand remote: [
+                name: server, 
+                host: server,
+                user: env.REMOTE_USER_NAME,
+                identityFile: env.IDENTITY,
+                allowAnyHosts: true
+        ], command: "echo \$($cmd)"
+    }
     return result
 }
+
 
 pipeline {
     agent any
@@ -25,6 +34,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
@@ -68,6 +78,7 @@ pipeline {
                 echo 'docker rmi success'
             }
         }
+         */
 
         stage('Deploy') {
             steps {
@@ -126,7 +137,7 @@ pipeline {
                     }
 
                     // 서버 배포 도중 실패, 롤백
-                    if(res == false) {
+                    if(success == false) {
                         newGroup.each { server ->
                             echo "stop $server"
                             ssh(server, "docker-compose stop")
