@@ -137,7 +137,7 @@ pipeline {
                     }
 
                     // 서버 배포 도중 실패, 롤백
-                    if(res == false) {
+                    if(success == false) {
                         newGroup.each { server ->
                             echo "stop $server"
                             ssh(server, "docker-compose stop")
