@@ -1,8 +1,17 @@
 #!groovy
 def ssh(server, cmd) {
-    def result = sshCommand remote: server, command: cmd
+    withCredentials([sshUserPrivateKey(credentialsId: 'ssh-credentials', keyFileVariable: 'IDENTITY', usernameVariable: 'REMOTE_USER_NAME')]) {
+        result = sshCommand remote: [
+                name: server,
+                host: server,
+                user: env.REMOTE_USER_NAME,
+                identityFile: env.IDENTITY,
+                allowAnyHosts: true
+        ], command: "echo \$($cmd)"
+    }
     return result
 }
+
 
 pipeline {
     agent any
@@ -25,6 +34,7 @@ pipeline {
             }
         }
 
+
         stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
@@ -32,14 +42,12 @@ pipeline {
                 echo 'build success'
             }
         }
-
         stage('Test') {
             steps {
                 sh './gradlew test'
                 echo 'test success'
             }
         }
-
         stage('Build docker image') {
             steps {
                 script {
@@ -48,7 +56,6 @@ pipeline {
                 echo 'build docker image success'
             }
         }
-
         stage('Push docker image') {
             steps {
                 script {
@@ -60,7 +67,6 @@ pipeline {
                 echo 'push docker image success'
             }
         }
-
         stage('Remove unused docker image') {
             steps {
                 sh "docker rmi $IMAGE_NAME:$TAG"
@@ -92,7 +98,7 @@ pipeline {
 
                     echo "${oldName}에서 $newName 서버 그룹으로 전환 및 배포 시작"
 
-                    // 새로 배포될 서버 그룹에 속한 서버 배포
+                    // 배포할 서버 그룹을 타겟으로 서버 배포
                     newGroup.each { server ->
                         echo "deploy $server"
                         ssh(server, "docker-compose up -d")
@@ -128,7 +134,7 @@ pipeline {
                     }
 
                     // 서버 배포 도중 실패, 롤백
-                    if(res == false) {
+                    if(success == false) {
                         newGroup.each { server ->
                             echo "stop $server"
                             ssh(server, "docker-compose stop")
@@ -171,7 +177,7 @@ pipeline {
                     }
 
                     echo("nginx reload")
-                    ssh(NGINX_SERVER, "docker exec nginx nginx -s reload")
+                    ssh(env.NGINX_SERVER, "docker exec nginx nginx -s reload")
 
                     // 새롭게 배포한 서버 상태 모니터링
                     def interval = 6
