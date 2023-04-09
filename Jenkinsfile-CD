@@ -10,6 +10,7 @@ def ssh(server, cmd) {
     }
 }
 
+
 pipeline {
     agent any
 
@@ -31,6 +32,16 @@ pipeline {
             }
         }
 
+        stage('ssh test') {
+            steps {
+                script {
+                    def res = ssh(NGINX_SERVER, "echo 3")
+                    echo $res
+                }
+            }
+        }
+
+        /*
         stage('Build') {
             steps {
                 sh 'chmod +x gradlew'
@@ -225,7 +236,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
     }
 
     post {
