@@ -46,7 +46,6 @@ dependencies {
     runtimeOnly("mysql:mysql-connector-java")
 
     // redis
-    implementation ("io.lettuce:lettuce-core:6.1.5")
     implementation ("org.springframework.boot:spring-boot-starter-data-redis")
 
     // embedded-redis
