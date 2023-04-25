@@ -3,39 +3,37 @@ package com.mojh.cms.coupon.service
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.coupon.dto.request.CreateCouponRequest
-import com.mojh.cms.coupon.dto.response.MemberCouponResponse
-import com.mojh.cms.coupon.entity.MemberCoupon
+import com.mojh.cms.coupon.entity.Coupon
+import com.mojh.cms.coupon.entity.CouponRedis
+import com.mojh.cms.coupon.repository.CouponRedisRepository
 import com.mojh.cms.coupon.repository.CouponRepository
 import com.mojh.cms.coupon.repository.MemberCouponRepository
 import com.mojh.cms.member.entity.Member
 import org.apache.logging.log4j.LogManager
-import org.redisson.api.RBucket
-import org.redisson.api.RLock
-import org.redisson.api.RedissonClient
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.DefaultTransactionDefinition
-import java.util.concurrent.TimeUnit
+import java.time.Instant
 
 @Service
 class CouponService(
     private val couponRepository: CouponRepository,
     private val memberCouponRepository: MemberCouponRepository,
-    private val redisson: RedissonClient,
-    private val transactionManager: PlatformTransactionManager
+    private val redisTemplate: RedisTemplate<String, Any>,
+    private val couponRedisRepository: CouponRedisRepository,
 ) {
     companion object {
         private val LOGGER = LogManager.getLogger()
     }
 
-    @Value("\${coupon.lock-key-prefix}")
-    private val COUPON_RLOCK_KEY_PREFIX: String = ""
+    @Value("\${coupon.downloaders-key-prefix}")
+    private val COUPON_DOWNLOADERS_KEY_PREFIX: String = ""
 
-    @Value("\${coupon.count-key-prefix}")
-    private val COUPON_COUNT_KEY_PREFIX: String = ""
+    @Value("\${coupon.coupon-issuance-queue-key}")
+    private val COUPON_ISSUANCE_QUEUE_KEY: String = ""
 
     @Transactional
     fun createCoupon(createCouponRequest: CreateCouponRequest, seller: Member): Long? {
@@ -46,96 +44,72 @@ class CouponService(
     fun enable(couponId: Long, seller: Member) {
         val couponInfo = couponRepository.findByIdOrNull(couponId)
             ?: throw CouponApplicationException(ErrorCode.COUPON_DOES_NOT_EXIST)
-
-        redisson.getBucket<Int>("${COUPON_COUNT_KEY_PREFIX}${couponId}").set(couponInfo.maxCount)
-
         couponInfo.enable(seller)
+        val couponRedis = CouponRedis.from(couponInfo)
+
+        couponRedisRepository.save(couponRedis)
         couponRepository.save(couponInfo)
     }
 
-    fun getActuallyDeployedCouponCount(couponId: Long) =
+    fun getActuallyIssuedCouponCount(couponId: Long) =
         memberCouponRepository.countByCouponId(couponId)
 
-    fun getCouponCountInRedis(couponId: Long) =
-        redisson.getBucket<Int>("${COUPON_COUNT_KEY_PREFIX}${couponId}").get()
 
-    fun downloadCoupon(couponId: Long, customer: Member): MemberCouponResponse {
-        val threadInfo = "[thread-${Thread.currentThread().id}]"
+    // TODO
+    fun downloadCoupon(couponId: Long, customer: Member): Boolean {
+        val script = """
+            local coupon_id = KEYS[1]
+            local coupon_key = 'coupon:'..coupon_id
+            local coupon_downloaders_key = KEYS[2]..'_'..coupon_id
+            local coupon_issuance_queue_key = KEYS[3]
+            local customer_id = ARGV[1]
+            local enabled = ARGV[2]
+            local now = tonumber(ARGV[3])
+            local coupon_issuance_queue_value = coupon_id..':'..customer_id
 
-        LOGGER.info("${threadInfo} couponId: ${couponId}, memberId: ${customer.id!!} 쿠폰 발급 시도")
-        val couponInfo = couponRepository.findByIdOrNull(couponId)
-            ?: throw CouponApplicationException(ErrorCode.COUPON_DOES_NOT_EXIST)
+            -- 쿠폰 발급 가능 여부 확인
+            -- 활성화 상태인지 확인
+            local status = redis.call('HGET', coupon_key, 'status')
+            if status ~= enabled then
+              return 'COUPON_NOT_ENABLED_ERROR'
+            end
 
-        if (!couponInfo.isAvailable()) {
-            throw CouponApplicationException(ErrorCode.UNABLE_DOWNLOAD_COUPON)
-        }
+            -- 발급 가능 시간 비교
+            local start_at = tonumber(redis.call('HGET', coupon_key, 'startAt'))
+            local end_at = tonumber(redis.call('HGET', coupon_key, 'endAt'))
+            if (now < start_at or now > end_at) then
+              return 'ISSUANCE_PERIOD_ERROR'
+            end
 
-        var result: MemberCouponResponse?
+            -- 개수 확인
+            local max_count = tonumber(redis.call('HGET', coupon_key, 'maxCount'))
+            local curr_count = tonumber(redis.call('SCARD', coupon_downloaders_key))
+            if (curr_count >= max_count) then
+              return 'COUPON_EXHAUSTED_ERROR'
+            end
 
-        val lock: RLock = redisson.getLock("${COUPON_RLOCK_KEY_PREFIX}${couponId}")
+            -- 중복 발급 여부 확인
+            if (redis.call('SISMEMBER', coupon_downloaders_key, customer_id) == 1) then
+              return 'DUPLICATE_CUSTOMER_ERROR'
+            end
 
-        LOGGER.info("${threadInfo} lock 획득 시도")
+            -- 쿠폰 발급 요청 성공한 유저 목록에 추가
+            redis.call('SADD', coupon_downloaders_key, customer_id)
+            -- 쿠폰 발급 요청 대기 큐에 쿠폰과 유저 id 정보 추가
+            redis.call('ZADD', coupon_issuance_queue_key, now, coupon_issuance_queue_value)
 
-        /**
-         * tryLock은 lock 획득 여부에 따라 boolean으로 리턴되는데
-         * 만약 try 구문 안에 포함시켜 버리면 lock 획득 실패하고 finally에서 lock을 획득했던 thread와
-         * 다른 thread에서 unlock 요청이 될 수 있어 에러가 발생
-         * 그래서 try 전에 lock 획득 시도하도록 변경
-         **/
-        if (!lock.tryLock(30, 3, TimeUnit.SECONDS)) {
-            LOGGER.info("${threadInfo} lock 획득 실패")
-            throw CouponApplicationException(ErrorCode.DOWNLOAD_COUPON_TIME_OUT)
-        }
+            return 'SUCCESS'
+        """.trimIndent()
 
-        try {
-            LOGGER.info("${threadInfo} lock 획득")
+        val now = Instant.now().toEpochMilli().toString()
+        val scriptResult = redisTemplate.execute(
+            RedisScript.of(script, String::class.java),
+            listOf(couponId.toString(), COUPON_DOWNLOADERS_KEY_PREFIX, COUPON_ISSUANCE_QUEUE_KEY),
+            customer.id.toString(), Coupon.Status.ENABLED.toString(), now
+        )
 
-            if (memberCouponRepository.findAllByCustomerIdAndCouponId(customer.id!!, couponId).size >= 1) {
-                throw CouponApplicationException(ErrorCode.HAS_ALREADY_DOWNLOADED_COUPON)
-            }
+        LOGGER.info("couponId=$couponId, memberId=$customer.id res=$scriptResult")
 
-            val status = transactionManager.getTransaction(DefaultTransactionDefinition())
-            try {
-                val couponCountRBucket: RBucket<Int> = redisson.getBucket(COUPON_COUNT_KEY_PREFIX + couponId)
-                val couponCount = couponCountRBucket.get()
-                if (!couponCountRBucket.isExists || couponCount <= 0) {
-                    LOGGER.info("${threadInfo} 준비된 모든 쿠폰 소진")
-                    throw CouponApplicationException(ErrorCode.RUN_OUT_OF_COUPONS)
-                }
-
-                LOGGER.info("${threadInfo} coupon 잔여 갯수 : $couponCount")
-                couponCountRBucket.set(couponCount - 1)
-                val memberCoupon = MemberCoupon.of(customer, couponInfo)
-                memberCouponRepository.save(memberCoupon)
-
-                /**
-                 * 만약 lock을 획득한 후 어떠한 이유로 lease time이 넘은 시간 동안 로직이 지연되고 나서
-                 * 완료되어 DB에 commit하려 할 때 이미 lock이 lease time이 넘어가 자동으로 해제된 상황
-                 * 그래서 다른 스레드가 접근할 수 있는 상황에서 우연히 연속으로 같은 request가 들어오면
-                 * 중복 처리 되어 쿠폰이 제한 갯수보다 많이 발급 될 수 있기에 커밋 직전에 lock에 대해 검사
-                 */
-                if (!lock.isHeldByCurrentThread) {
-                    LOGGER.warn("${threadInfo} lease time이 되기전 로직이 성공하지 못함")
-                    throw CouponApplicationException(ErrorCode.COUPON_DOWNLOAD_FAILED)
-                }
-                transactionManager.commit(status)
-                result = MemberCouponResponse.from(memberCoupon)
-                LOGGER.info("${threadInfo} couponId: ${couponId}, memberId: ${customer.id!!} 쿠폰 발급 성공")
-            } catch (ex: Exception) {
-                transactionManager.rollback(status)
-                throw ex
-            }
-        } catch (ex: InterruptedException) {
-            LOGGER.warn(ex)
-            throw CouponApplicationException(ErrorCode.COUPON_DOWNLOAD_FAILED)
-        } finally {
-            // lock이 존재하고 해당 thread에 의해 잠긴 경우 unlock
-            if (lock.isHeldByCurrentThread) {
-                lock.unlock()
-                LOGGER.info("${threadInfo} lock 반납 성공")
-            }
-        }
-
-        return result ?: throw CouponApplicationException(ErrorCode.COUPON_DOWNLOAD_FAILED)
+        return true;
     }
 }
