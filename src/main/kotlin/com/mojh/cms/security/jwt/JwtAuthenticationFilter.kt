@@ -35,7 +35,7 @@ class JwtAuthenticationFilter(
             jwtTokenUtils.extractTokenFrom(request.getHeader(AUTHORIZATION))?.let{
                 jwtTokenUtils.validateToken(it)
                 val accountId = jwtTokenUtils.parseAccountId(it)
-                if (jwtTokenUtils.isBlockedAccessToken(it, accountId)) {
+                if (jwtTokenUtils.isBlockedAccessToken(accountId, it)) {
                     throw CouponApplicationException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
                 }
 

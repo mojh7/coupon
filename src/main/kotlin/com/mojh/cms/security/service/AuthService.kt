@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.TimeUnit
 
 
 @Service
@@ -34,8 +33,7 @@ class AuthService(
         val accessToken = jwtTokenUtils.createAccessToken(loginRequest.accountId)
         val refreshToken = jwtTokenUtils.createRefreshToken()
 
-        jwtTokenUtils.getRefreshTokenRSetCache(loginRequest.accountId)
-            .add(refreshToken, REFRESH_TOKEN_VALID_TIME, TimeUnit.MILLISECONDS)
+        jwtTokenUtils.addRefreshToken(loginRequest.accountId, refreshToken, REFRESH_TOKEN_VALID_TIME)
 
         return TokensResponse(accessToken, refreshToken)
     }
@@ -47,20 +45,18 @@ class AuthService(
         val accessToken = accessTokenHeader?.let { jwtTokenUtils.extractTokenFrom(it) } ?: throw CouponApplicationException(INVALID_TOKEN)
         val accountId = jwtTokenUtils.parseAccountId(accessToken)
 
-        if (jwtTokenUtils.isBlockedAccessToken(accessToken, accountId)) {
+        if (jwtTokenUtils.isBlockedAccessToken(accountId, accessToken)) {
             throw CouponApplicationException(ALREADY_LOGGED_OUT_MEMBER)
         }
 
         // refresh token redis에서 제거
-        val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
-        if (!refreshTokenSet.contains(refreshToken)) {
+        if (!jwtTokenUtils.containsRefreshToken(accountId, refreshToken)) {
             throw CouponApplicationException(ALREADY_LOGGED_OUT_MEMBER)
         }
-        refreshTokenSet.remove(refreshToken)
+        jwtTokenUtils.removeRefreshToken(accountId, refreshToken)
 
         // access token blacklist 등록
-        jwtTokenUtils.getAccessTokenRSetCache(accountId)
-            .add(accessToken, jwtTokenUtils.getRemainingExpirationTime(accessToken), TimeUnit.MILLISECONDS)
+        jwtTokenUtils.addAccessTokenBlackList(accountId, accessToken)
     }
 
     @Transactional(readOnly = true)
@@ -73,8 +69,7 @@ class AuthService(
 
         jwtTokenUtils.validateToken(refreshToken)
 
-        val refreshTokenSet = jwtTokenUtils.getRefreshTokenRSetCache(accountId)
-        if (!refreshTokenSet.contains(refreshToken)) {
+        if (!jwtTokenUtils.containsRefreshToken(accountId, refreshToken)) {
             throw CouponApplicationException(NEED_TO_LOGIN_AGAIN)
         }
 
