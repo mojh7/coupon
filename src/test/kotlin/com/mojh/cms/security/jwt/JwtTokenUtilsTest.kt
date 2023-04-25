@@ -1,7 +1,7 @@
 package com.mojh.cms.security.jwt
 
 import com.mojh.cms.common.BaseTest
-import com.mojh.cms.common.config.RedissonConfig
+import com.mojh.cms.common.config.RedisConfig
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.security.BEARER_PREFIX
@@ -14,28 +14,25 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldHaveLength
 import io.kotest.matchers.string.shouldHaveMinLength
 import io.kotest.matchers.string.shouldStartWith
-import org.redisson.api.RSetCache
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.util.StringUtils
 
 @BaseTest
-@SpringBootTest(classes = [RedissonConfig::class, JwtTokenUtils::class])
+@SpringBootTest(classes = [RedisConfig::class, JwtTokenUtils::class])
 internal class JwtTokenUtilsTest(
     private val jwtTokenUtils: JwtTokenUtils
 ) : FunSpec() {
 
     companion object {
-        private const val ACCOUNT_ID = "testAccountId";
-        private const val JWT_HEADER_BASE64 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.";
-        private const val EXPIRED_ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhY2Nlc3MiLCJpZCI6InRlc3RBY2NvdW50SWQiLCJpYXQiOjE2NDc1MDE1NDYsImV4cCI6MTY0NzUwMTYzNn0.US3LiOA6B4Wtq9PJnxZPBrLJ_SREYVDKkf-wblshSRSI4dlZnnxvB4FyKFLCVRC97LEhivEmPHC4OkkgiHuECg";
+        private const val ACCOUNT_ID = "testAccountId"
+        private const val JWT_HEADER_BASE64 = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9."
+        private const val EXPIRED_ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhY2Nlc3MiLCJpZCI6InRlc3RBY2NvdW50SWQiLCJpYXQiOjE2NDc1MDE1NDYsImV4cCI6MTY0NzUwMTYzNn0.US3LiOA6B4Wtq9PJnxZPBrLJ_SREYVDKkf-wblshSRSI4dlZnnxvB4FyKFLCVRC97LEhivEmPHC4OkkgiHuECg"
         private const val EXPIRED_REFRESH_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2NDc1MDI4NzYsImV4cCI6MTY0NzUwMzAyNn0.1RurnEP4bNLxlEZ8CBxvzsSguqxB2lOhfBoIAcMnQGMRs4l-HVwePjbKHWaEKMKGa3WxYE7IMknQuzrrykPB2Q"
         private const val INVALID_TOKEN = "invalidToken"
     }
 
     init {
         isolationMode = IsolationMode.InstancePerLeaf
-
-
 
         test("액세스 토큰 생성 시 유효한 토큰이 반환된다") {
             val actualAccessToken = jwtTokenUtils.createAccessToken(ACCOUNT_ID)
@@ -206,7 +203,7 @@ internal class JwtTokenUtilsTest(
             }
         }*/
 
-        test("레디스에 계정 아이디에 해당하는 액세스 토큰 Set을 조회한다") {
+        /*test("레디스에 계정 아이디에 해당하는 액세스 토큰 Set을 조회한다") {
             val result = jwtTokenUtils.getAccessTokenRSetCache(ACCOUNT_ID)
 
             assertSoftly(result) {
@@ -226,7 +223,7 @@ internal class JwtTokenUtilsTest(
                 isEmpty() shouldBe true
                 size shouldBe 0
             }
-        }
+        }*/
 
         context("HTTP Authorization header에서 type을 제거하고 토큰 정보를 추출한다") {
             context("Authorization header가") {
