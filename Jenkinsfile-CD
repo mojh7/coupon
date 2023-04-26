@@ -167,7 +167,7 @@ pipeline {
                     // blue.conf, green.conf 수정
                     // nginx.conf 내에 upstream 변경, blue.conf <-> green.conf 수정
                     ssh(env.NGINX_SERVER, "echo '${oldGroupConf}' > ~/nginx/${oldName}.conf\n" +
-                            "\"echo '${newGroupConf}' > ~/nginx/${newName}.conf\n" +
+                            "echo '${newGroupConf}' > ~/nginx/${newName}.conf\n" +
                             "sed -i 's/${oldName}.conf/${newName}.conf/g' ~/nginx/nginx.conf")
 
                     sleep 1
