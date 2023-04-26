@@ -60,7 +60,7 @@ class CouponService(
         val script = """
             local coupon_id = KEYS[1]
             local coupon_key = 'coupon:'..coupon_id
-            local coupon_downloaders_key = KEYS[2]..'_'..coupon_id
+            local coupon_downloaders_key = KEYS[2]..':'..coupon_id
             local coupon_issuance_queue_key = KEYS[3]
             local customer_id = ARGV[1]
             local enabled = ARGV[2]
