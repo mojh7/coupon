@@ -6,7 +6,6 @@ import com.mojh.cms.member.repository.MemberRepository
 import com.mojh.cms.security.dto.TokensResponse
 import com.mojh.cms.security.dto.request.LoginRequest
 import com.mojh.cms.security.jwt.JwtTokenUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,8 +17,7 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenUtils: JwtTokenUtils
 ) {
-    @Value("\${jwt.refresh-token-valid-time}")
-    private val REFRESH_TOKEN_VALID_TIME: Long = 0
+
 
     @Transactional
     fun login(loginRequest: LoginRequest): TokensResponse {
@@ -33,7 +31,7 @@ class AuthService(
         val accessToken = jwtTokenUtils.createAccessToken(loginRequest.accountId)
         val refreshToken = jwtTokenUtils.createRefreshToken()
 
-        jwtTokenUtils.addRefreshToken(loginRequest.accountId, refreshToken, REFRESH_TOKEN_VALID_TIME)
+        jwtTokenUtils.addRefreshToken(loginRequest.accountId, refreshToken)
 
         return TokensResponse(accessToken, refreshToken)
     }

@@ -116,7 +116,7 @@ class JwtTokenUtils(
      */
     fun isBlockedAccessToken(accountId: String, accessToken: String): Boolean {
         val key = ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId
-        val contains = redisTemplate.opsForSet().isMember(key, accessToken);
+        val contains = redisTemplate.opsForSet().isMember(key, accessToken)
         return contains!!
     }
 
@@ -140,10 +140,10 @@ class JwtTokenUtils(
         redisTemplate.expire(key, getRemainingExpirationTime(accessToken), TimeUnit.MILLISECONDS)
     }
 
-    fun addRefreshToken(accountId: String, refreshToken: String, timeout: Long) {
+    fun addRefreshToken(accountId: String, refreshToken: String) {
         val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId
         redisTemplate.opsForSet().add(key, refreshToken)
-        redisTemplate.expire(key, timeout, TimeUnit.MILLISECONDS)
+        redisTemplate.expire(key, REFRESH_TOKEN_VALID_TIME, TimeUnit.MILLISECONDS)
     }
 
     fun removeRefreshToken(accountId: String, refreshToken: String) {
@@ -153,7 +153,7 @@ class JwtTokenUtils(
 
     fun containsRefreshToken(accountId: String, refreshToken: String): Boolean {
         val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId
-        val contains = redisTemplate.opsForSet().isMember(key, refreshToken);
+        val contains = redisTemplate.opsForSet().isMember(key, refreshToken)
         return contains!!
     }
 
