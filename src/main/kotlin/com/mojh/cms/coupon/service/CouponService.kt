@@ -54,8 +54,6 @@ class CouponService(
     fun getActuallyIssuedCouponCount(couponId: Long) =
         memberCouponRepository.countByCouponId(couponId)
 
-
-    // TODO
     fun downloadCoupon(couponId: Long, customer: Member): Boolean {
         val script = """
             local coupon_id = KEYS[1]
@@ -66,31 +64,35 @@ class CouponService(
             local enabled = ARGV[2]
             local now = tonumber(ARGV[3])
             local coupon_issuance_queue_value = coupon_id..':'..customer_id
+            local COUPON_NOT_ENABLED = ARGV[4]
+            local COUPON_ISSUE_PERIOD_INVALID = ARGV[5]
+            local COUPON_EXHAUSTED = ARGV[6]
+            local ALREADY_DOWNLOADED_COUPON = ARGV[7]
 
             -- 쿠폰 발급 가능 여부 확인
             -- 활성화 상태인지 확인
             local status = redis.call('HGET', coupon_key, 'status')
             if status ~= enabled then
-              return 'COUPON_NOT_ENABLED_ERROR'
+              return COUPON_NOT_ENABLED
             end
 
             -- 발급 가능 시간 비교
             local start_at = tonumber(redis.call('HGET', coupon_key, 'startAt'))
             local end_at = tonumber(redis.call('HGET', coupon_key, 'endAt'))
             if (now < start_at or now > end_at) then
-              return 'ISSUANCE_PERIOD_ERROR'
+              return COUPON_ISSUE_PERIOD_INVALID
             end
 
             -- 개수 확인
             local max_count = tonumber(redis.call('HGET', coupon_key, 'maxCount'))
             local curr_count = tonumber(redis.call('SCARD', coupon_downloaders_key))
             if (curr_count >= max_count) then
-              return 'COUPON_EXHAUSTED_ERROR'
+              return COUPON_EXHAUSTED
             end
 
             -- 중복 발급 여부 확인
             if (redis.call('SISMEMBER', coupon_downloaders_key, customer_id) == 1) then
-              return 'DUPLICATE_CUSTOMER_ERROR'
+              return ALREADY_DOWNLOADED_COUPON
             end
 
             -- 쿠폰 발급 요청 성공한 유저 목록에 추가
@@ -101,12 +103,19 @@ class CouponService(
             return 'SUCCESS'
         """.trimIndent()
 
+
         val now = Instant.now().toEpochMilli().toString()
         val scriptResult = redisTemplate.execute(
             RedisScript.of(script, String::class.java),
             listOf(couponId.toString(), COUPON_DOWNLOADERS_KEY_PREFIX, COUPON_ISSUANCE_QUEUE_KEY),
-            customer.id.toString(), Coupon.Status.ENABLED.toString(), now
+            customer.id.toString(), Coupon.Status.ENABLED.toString(), now,
+            ErrorCode.COUPON_NOT_ENABLED.name, ErrorCode.COUPON_ISSUE_PERIOD_INVALID.name,
+            ErrorCode.COUPON_EXHAUSTED.name, ErrorCode.ALREADY_DOWNLOADED_COUPON.name
         )
+
+        if (scriptResult != "SUCCESS") {
+            throw CouponApplicationException(ErrorCode.valueOf(scriptResult))
+        }
 
         LOGGER.info("couponId=$couponId, memberId=$customer.id res=$scriptResult")
 
