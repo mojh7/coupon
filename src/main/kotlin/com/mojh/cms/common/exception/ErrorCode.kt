@@ -29,7 +29,7 @@ enum class ErrorCode(
     ALREADY_DOWNLOADED_COUPON(CONFLICT, "204", "이미 다운로드 받은 쿠폰입니다."),
     COUPON_IS_NOT_AVAILABLE(BAD_REQUEST, "205", "쿠폰을 사용할 수 없습니다."),
     CUSTOMER_COUPON_DOES_NOT_EXIST(NOT_FOUND, "206", "회원 쿠폰이 존재하지 않습니다."),
-
+    COUPON_DOWNLOAD_FAILED(INTERNAL_SERVER_ERROR, "207", "서버 문제로 인해 쿠폰 다운로드에 실패했습니다.")
 
     // event
 }
