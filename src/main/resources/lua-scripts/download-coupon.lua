@@ -1,15 +1,16 @@
 local coupon_id = KEYS[1]
 local coupon_key = 'coupon:'..coupon_id
-local coupon_downloaders_key = KEYS[2]..':'..coupon_id
-local coupon_issuance_queue_key = KEYS[3]
+local coupon_downloaders_key = 'coupon_downloaders:'..coupon_id
+local coupon_issuance_queue_key = 'coupon_issuance_queue'
 local customer_id = ARGV[1]
 local enabled = ARGV[2]
 local now = tonumber(ARGV[3])
-local coupon_issuance_queue_value = coupon_id..':'..customer_id
+local coupon_issuance_queue_value = coupon_id..' '..customer_id
 local COUPON_NOT_ENABLED = ARGV[4]
 local COUPON_ISSUE_PERIOD_INVALID = ARGV[5]
 local COUPON_EXHAUSTED = ARGV[6]
 local ALREADY_DOWNLOADED_COUPON = ARGV[7]
+
 
 -- 쿠폰 발급 가능 여부 확인
 -- 활성화 상태인지 확인

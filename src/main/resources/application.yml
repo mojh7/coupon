@@ -16,5 +16,3 @@ server:
 coupon:
   lock-key-prefix: 'CRL:'
   count-key-prefix: 'CC:'
-  downloaders-key-prefix: 'coupon_downloaders'
-  coupon-issuance-queue-key: 'coupon_issuance_queue'
