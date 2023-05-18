@@ -56,6 +56,8 @@ dependencies {
 
     // log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    // log4j2.yml 적용시 필요
+    implementation ("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
     // test
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
