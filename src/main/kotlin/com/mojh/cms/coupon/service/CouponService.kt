@@ -56,7 +56,7 @@ class CouponService(
             downloadCouponScript, listOf(couponId.toString()),
             customer.id.toString(), Coupon.Status.ENABLED.toString(), now,
             COUPON_NOT_ENABLED.name, COUPON_ISSUE_PERIOD_INVALID.name,
-            COUPON_EXHAUSTED.name, ALREADY_DOWNLOADED_COUPON.name
+            ALREADY_DOWNLOADED_COUPON.name, COUPON_EXHAUSTED.name
         )
 
         if (scriptResult != "SUCCESS") {
