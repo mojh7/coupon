@@ -1,5 +1,4 @@
-Configutation:
-  name: Default
+Configuration:
   status: warn
 
   Properties:
@@ -9,17 +8,19 @@ Configutation:
 
   Appenders:
     Console:
-      name: ConsoleLog
+      name: Console_Appender
       target: SYSTEM_OUT
       PatternLayout:
         pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+
     File:
-      name: FileLog
+      name: File_Appender
       fileName: ${log-path}/logfile.log
       PatternLayout:
         pattern: "[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"
+
     RollingFile: # 조건에 따라
-      - name: RollingFileLog
+      - name: RollingFile_Appender
         fileName: ${log-path}/rollingfile.log
         filePattern: "logs/archive/rollingfile.log.%d{yyyy-MM-dd-hh-mm}.gz"
         PatternLayout:
@@ -28,19 +29,19 @@ Configutation:
           SizeBasedTriggeringPolicy:
             size: 10 MB
         DefaultRollOverStrategy:
-          max: 20
+          max: 30
   Loggers:
     Root:
       level: info
       AppenderRef:
-        - ref: ConsoleLog
-        - ref: FileLog
-        - ref: RollingFileLog
+        - ref: Console_Appender
+        - ref: File_Appender
+        - ref: RollingFile_Appender
     Logger:
       - name: com.mojh
         additivity: false
         level: debug
         AppenderRef:
-          - ref: ConsoleLog
-          - ref: FileLog
-          - ref: RollingFileLog
+          - ref: Console_Appender
+          - ref: File_Appender
+          - ref: RollingFile_Appender
