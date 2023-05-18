@@ -25,24 +25,10 @@ class CouponService(
     private val memberCouponRepository: MemberCouponRepository,
     private val redisTemplate: RedisTemplate<String, Any>,
     private val couponRedisRepository: CouponRedisRepository,
+    private val downloadCouponScript: RedisScript<String>
 ) {
     companion object {
         private val LOGGER = LogManager.getLogger()
-    }
-
-    @Value("\${coupon.downloaders-key-prefix}")
-    private val COUPON_DOWNLOADERS_KEY_PREFIX: String = ""
-
-    @Value("\${coupon.coupon-issuance-queue-key}")
-    private val COUPON_ISSUANCE_QUEUE_KEY: String = ""
-
-    @Value("\${classpath:lua-scripts/download-coupon.lua}")
-    private val DOWNLOAD_COUPON_SCRIPT_RESOURCE: String? = null
-
-    private val DOWNLOAD_COUPON_SCRIPT: String by lazy {
-        DOWNLOAD_COUPON_SCRIPT_RESOURCE?.takeIf { it.isNotBlank() }
-            ?.trimIndent()
-            ?: throw CouponApplicationException(COUPON_DOWNLOAD_FAILED)
     }
 
     @Transactional
@@ -67,8 +53,7 @@ class CouponService(
     fun downloadCoupon(couponId: Long, customer: Member): Boolean {
         val now = Instant.now().toEpochMilli().toString()
         val scriptResult = redisTemplate.execute(
-            RedisScript.of(DOWNLOAD_COUPON_SCRIPT, String::class.java),
-            listOf(couponId.toString(), COUPON_DOWNLOADERS_KEY_PREFIX, COUPON_ISSUANCE_QUEUE_KEY),
+            downloadCouponScript, listOf(couponId.toString()),
             customer.id.toString(), Coupon.Status.ENABLED.toString(), now,
             COUPON_NOT_ENABLED.name, COUPON_ISSUE_PERIOD_INVALID.name,
             COUPON_EXHAUSTED.name, ALREADY_DOWNLOADED_COUPON.name

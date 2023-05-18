@@ -3,11 +3,15 @@ package com.mojh.cms.common.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.io.ClassPathResource
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.DefaultRedisScript
+import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.scripting.support.ResourceScriptSource
 
 @Configuration
 class RedisConfig {
@@ -34,4 +38,17 @@ class RedisConfig {
             hashValueSerializer = GenericJackson2JsonRedisSerializer()
         }
     }
+
+    @Bean
+    fun downloadCouponScript(): RedisScript<String> {
+        val script = DefaultRedisScript<String>()
+        script.setScriptSource(ResourceScriptSource(ClassPathResource("lua-scripts/download-coupon.lua")))
+        script.resultType = String::class.java
+        return script
+    }
+
+    /*
+    val scriptSource = ResourceScriptSource(ClassPathResource("lua-scripts/download-coupon.lua")).toString()
+        return DefaultRedisScript(scriptSource, String::class.java)
+     */
 }
