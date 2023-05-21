@@ -101,7 +101,7 @@ pipeline {
                     // 배포할 서버 그룹을 타겟으로 서버 배포
                     newGroup.each { server ->
                         echo "deploy $server"
-                        ssh(server, "docker-compose up -d")
+                        ssh(server, "docker-compose pull && docker-compose up -d")
                     }
 
                     // 서버 상태 체크
@@ -166,11 +166,14 @@ pipeline {
 
                     // blue.conf, green.conf 수정
                     // nginx.conf 내에 upstream 변경, blue.conf <-> green.conf 수정
-                    ssh(env.NGINX_SERVER, "echo ${oldGroupConf}' > ~/nginx/${oldName}.conf\n" +
-                            "\"echo ${newGroupConf}' > ~/nginx/${newName}.conf\n" +
-                            "sed -i 's/${oldName}.conf/${newName}.conf/g' ~/nginx/nginx.conf")
+                    def nginxPath="~/nginx/"
+                    ssh(env.NGINX_SERVER, "echo '${oldGroupConf}' > ${nginxPath}${oldName}.conf\n" +
+                            "echo '${newGroupConf}' > ${nginxPath}${newName}.conf\n" +
+                            "sed 's/${oldName}.conf/${newName}.conf/g' ${nginxPath}nginx.conf > ${nginxPath}tmp &&" +
+                            "cp -p --no-preserve=mode,ownership ${nginxPath}tmp ${nginxPath}nginx.conf")
 
-                    sleep 1
+
+                    sleep 2
                     def nginxConfState = ssh(NGINX_SERVER, "docker exec -t nginx nginx -t | grep ok")
                     if(nginxConfState == "") {
                         error('Nginx configuration error')

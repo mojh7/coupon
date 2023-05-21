@@ -15,7 +15,7 @@ class CouponManagementController(
 ) {
     @GetMapping("/{couponId}/count")
     fun getActuallyDeployedCouponCount(@PathVariable couponId: Long) = run {
-        ApiResponse.succeed(couponService.getActuallyDeployedCouponCount(couponId))
+        ApiResponse.succeed(couponService.getActuallyIssuedCouponCount(couponId))
     }
 
     @PostMapping

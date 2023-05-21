@@ -22,14 +22,14 @@ enum class ErrorCode(
     ALREADY_LOGGED_OUT_MEMBER(UNAUTHORIZED, "107", "이미 로그아웃 처리된 멤버입니다."),
 
     // coupon
-    COUPON_DOES_NOT_EXIST(NOT_FOUND, "200", "해당 쿠폰 정보가 존재하지 않습니다."),
-    COUPON_DOWNLOAD_FAILED(INTERNAL_SERVER_ERROR, "201", "쿠폰 다운로드에 실패했습니다."),
-    HAS_ALREADY_DOWNLOADED_COUPON(CONFLICT, "202", "이미 쿠폰을 다운 받았습니다."),
-    DOWNLOAD_COUPON_TIME_OUT(REQUEST_TIMEOUT, "203", "쿠폰 다운로드 요청 time out"),
-    RUN_OUT_OF_COUPONS(CONFLICT, "204", "준비된 쿠폰이 모두 소진되었습니다."),
+    COUPON_NOT_FOUND(NOT_FOUND, "200", "해당 쿠폰 정보를 찾을 수 없습니다."),
+    COUPON_NOT_ENABLED(BAD_REQUEST, "201", "쿠폰이 활성화되지 않았습니다"),
+    COUPON_ISSUE_PERIOD_INVALID(BAD_REQUEST, "202", "쿠폰 발급 기간이 아닙니다."),
+    COUPON_EXHAUSTED (CONFLICT, "203", "준비된 쿠폰이 모두 소진되었습니다."),
+    ALREADY_DOWNLOADED_COUPON(CONFLICT, "204", "이미 다운로드 받은 쿠폰입니다."),
     COUPON_IS_NOT_AVAILABLE(BAD_REQUEST, "205", "쿠폰을 사용할 수 없습니다."),
     CUSTOMER_COUPON_DOES_NOT_EXIST(NOT_FOUND, "206", "회원 쿠폰이 존재하지 않습니다."),
-    UNABLE_DOWNLOAD_COUPON(CONFLICT, "207", "쿠폰을 다운로드 할 수 없습니다.")
+    COUPON_DOWNLOAD_FAILED(INTERNAL_SERVER_ERROR, "207", "서버 문제로 인해 쿠폰 다운로드에 실패했습니다.")
 
     // event
 }

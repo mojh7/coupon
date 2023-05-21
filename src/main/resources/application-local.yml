@@ -4,11 +4,11 @@ server:
 
 logging:
   config: classpath:log4j2.yml
-  level:
-    org:
-      hibernate:
-        type:
-          descriptor:
+#  level:
+#    org:
+#      hibernate:
+#        type:
+#          descriptor:
 #            sql: trace
 
 spring:
@@ -17,6 +17,10 @@ spring:
     url: jdbc:mysql://localhost:3306/cms?serverTimezone=UTC
     username: root
     password: 1234
+
+  redis:
+    host: localhost
+    port: 6379
 
   jpa:
     database: mysql

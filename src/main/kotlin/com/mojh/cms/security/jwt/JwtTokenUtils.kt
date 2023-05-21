@@ -10,17 +10,17 @@ import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
-import org.redisson.api.RSetCache
-import org.redisson.api.RedissonClient
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.crypto.SecretKey
 
 
 @Component
 class JwtTokenUtils(
-    private val redisson: RedissonClient
+    private val redisTemplate: RedisTemplate<String, Any>
 ) {
     @Value("\${jwt.secret-key}")
     private val SECRET_KEY_RAW: String = ""
@@ -114,11 +114,10 @@ class JwtTokenUtils(
     /**
      * 이미 로그아웃 처리되어 차단된 access token인지 확인
      */
-    fun isBlockedAccessToken(accessToken: String, accountId: String): Boolean {
-        if (getAccessTokenRSetCache(accountId).contains(accessToken)) {
-            return true
-        }
-        return false
+    fun isBlockedAccessToken(accountId: String, accessToken: String): Boolean {
+        val key = ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId
+        val contains = redisTemplate.opsForSet().isMember(key, accessToken)
+        return contains!!
     }
 
     fun extractTokenFrom(header: String?): String? {
@@ -130,9 +129,32 @@ class JwtTokenUtils(
         }
     }
 
-    fun getAccessTokenRSetCache(accountId: String): RSetCache<String> =
-        redisson.getSetCache(ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId)
+    fun getAccessTokenSet(accountId: String): MutableSet<out Any>? {
+        val valueOperations = redisTemplate.opsForSet()
+        return valueOperations.members(ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId)
+    }
 
-    fun getRefreshTokenRSetCache(accountId: String): RSetCache<String> =
-        redisson.getSetCache(REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId)
+    fun addAccessTokenBlackList(accountId: String, accessToken: String) {
+        val key = ACCESS_TOKEN_REDIS_KEY_PREFIX + accountId
+        redisTemplate.opsForSet().add(key, accessToken)
+        redisTemplate.expire(key, getRemainingExpirationTime(accessToken), TimeUnit.MILLISECONDS)
+    }
+
+    fun addRefreshToken(accountId: String, refreshToken: String) {
+        val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId
+        redisTemplate.opsForSet().add(key, refreshToken)
+        redisTemplate.expire(key, REFRESH_TOKEN_VALID_TIME, TimeUnit.MILLISECONDS)
+    }
+
+    fun removeRefreshToken(accountId: String, refreshToken: String) {
+        val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId
+        redisTemplate.opsForSet().remove(key, refreshToken)
+    }
+
+    fun containsRefreshToken(accountId: String, refreshToken: String): Boolean {
+        val key = REFRESH_TOKEN_REDIS_KEY_PREFIX + accountId
+        val contains = redisTemplate.opsForSet().isMember(key, refreshToken)
+        return contains!!
+    }
+
 }

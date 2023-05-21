@@ -13,8 +13,6 @@ server:
       force: true
   shutdown: graceful
 
-
-
 coupon:
-  lock-key-prefix: 'CRL:'
-  count-key-prefix: 'CC:'
+  issue-queue-key: 'issuable_coupon_queue'
+  issue-batch-size: 100

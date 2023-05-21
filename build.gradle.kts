@@ -45,8 +45,8 @@ dependencies {
     // mysql
     runtimeOnly("mysql:mysql-connector-java")
 
-    // redis(redisson)
-    implementation("org.redisson:redisson-spring-boot-starter:3.16.7")
+    // redis
+    implementation ("org.springframework.boot:spring-boot-starter-data-redis")
 
     // embedded-redis
     implementation ("it.ozimov:embedded-redis:0.7.2")
@@ -56,6 +56,8 @@ dependencies {
 
     // log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    // log4j2.yml 적용시 필요
+    implementation ("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
     // test
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
