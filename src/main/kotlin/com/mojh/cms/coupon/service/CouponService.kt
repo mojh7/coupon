@@ -27,6 +27,10 @@ class CouponService(
     private val couponRedisRepository: CouponRedisRepository,
     private val downloadCouponScript: RedisScript<String>
 ) {
+
+    @Value("\${coupon.issue-queue-key}")
+    private lateinit var COUPON_ISSUE_QUEUE_KEY: String
+
     companion object {
         private val LOGGER = LogManager.getLogger()
     }
@@ -37,23 +41,27 @@ class CouponService(
         return coupon.id
     }
 
+    @Transactional
     fun enable(couponId: Long, seller: Member) {
-        val couponInfo = couponRepository.findByIdOrNull(couponId)
-            ?: throw CouponApplicationException(COUPON_DOES_NOT_EXIST)
-        couponInfo.enable(seller)
+        val couponInfo = findById(couponId).apply { enable(seller) }
         val couponRedis = CouponRedis.from(couponInfo)
 
         couponRedisRepository.save(couponRedis)
         couponRepository.save(couponInfo)
     }
 
+    fun findById(id: Long) = couponRepository.findByIdOrNull(id)
+        ?: throw CouponApplicationException(COUPON_NOT_FOUND)
+
+    fun getById(id: Long) = couponRepository.getById(id)
+
     fun getActuallyIssuedCouponCount(couponId: Long) =
         memberCouponRepository.countByCouponId(couponId)
 
-    fun downloadCoupon(couponId: Long, customer: Member): Boolean {
+    fun tryDownloadCoupon(couponId: Long, customer: Member): Boolean {
         val now = Instant.now().toEpochMilli().toString()
         val scriptResult = redisTemplate.execute(
-            downloadCouponScript, listOf(couponId.toString()),
+            downloadCouponScript, listOf(couponId.toString(), COUPON_ISSUE_QUEUE_KEY),
             customer.id.toString(), Coupon.Status.ENABLED.toString(), now,
             COUPON_NOT_ENABLED.name, COUPON_ISSUE_PERIOD_INVALID.name,
             ALREADY_DOWNLOADED_COUPON.name, COUPON_EXHAUSTED.name
@@ -62,7 +70,6 @@ class CouponService(
         if (scriptResult != "SUCCESS") {
             throw CouponApplicationException(ErrorCode.valueOf(scriptResult))
         }
-
         LOGGER.info("couponId=$couponId, memberId=$customer.id res=$scriptResult")
 
         return true;

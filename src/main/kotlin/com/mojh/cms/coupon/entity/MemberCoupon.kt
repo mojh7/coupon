@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
-class MemberCoupon protected constructor(
+class MemberCoupon constructor(
     customer: Member,
     coupon: Coupon,
 ) : BaseEntity() {
@@ -18,7 +18,7 @@ class MemberCoupon protected constructor(
     var customer: Member = customer
         protected set
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id", nullable = false)
     val coupon: Coupon = coupon
 

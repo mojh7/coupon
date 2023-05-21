@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import org.springframework.scripting.support.ResourceScriptSource
+import java.util.*
 
 @Configuration
 class RedisConfig {
@@ -47,8 +48,11 @@ class RedisConfig {
         return script
     }
 
-    /*
-    val scriptSource = ResourceScriptSource(ClassPathResource("lua-scripts/download-coupon.lua")).toString()
-        return DefaultRedisScript(scriptSource, String::class.java)
-     */
+    @Bean
+    fun getIssuableCouponsScript(): RedisScript<List<String>> {
+        val script = DefaultRedisScript<List<String>>()
+        script.setScriptSource(ResourceScriptSource(ClassPathResource("lua-scripts/get-issuable-coupons.lua")))
+        script.resultType = List::class.java as Class<List<String>>
+        return script
+    }
 }
