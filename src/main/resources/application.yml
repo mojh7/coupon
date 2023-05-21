@@ -15,4 +15,4 @@ server:
 
 coupon:
   issue-queue-key: 'issuable_coupon_queue'
-  issue-batch-size: 60
+  issue-batch-size: 100
