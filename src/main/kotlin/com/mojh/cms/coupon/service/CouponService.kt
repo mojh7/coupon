@@ -58,11 +58,10 @@ class CouponService(
     fun getActuallyIssuedCouponCount(couponId: Long) =
         memberCouponRepository.countByCouponId(couponId)
 
-    fun tryDownloadCoupon(couponId: Long, customer: Member): Boolean {
-        val now = Instant.now().toEpochMilli().toString()
+    fun tryDownloadCoupon(couponId: Long, customer: Member, requestDateTime: Instant): Boolean {
         val scriptResult = redisTemplate.execute(
             downloadCouponScript, listOf(couponId.toString(), COUPON_ISSUE_QUEUE_KEY),
-            customer.id.toString(), Coupon.Status.ENABLED.toString(), now,
+            customer.id.toString(), Coupon.Status.ENABLED.toString(), requestDateTime.toEpochMilli().toString(),
             COUPON_NOT_ENABLED.name, COUPON_ISSUE_PERIOD_INVALID.name,
             ALREADY_DOWNLOADED_COUPON.name, COUPON_EXHAUSTED.name
         )
@@ -70,7 +69,7 @@ class CouponService(
         if (scriptResult != "SUCCESS") {
             throw CouponApplicationException(ErrorCode.valueOf(scriptResult))
         }
-        LOGGER.info("couponId=$couponId, memberId=$customer.id res=$scriptResult")
+        LOGGER.info("[${requestDateTime}] couponId=$couponId, memberId=${customer.id} res=$scriptResult")
 
         return true;
     }
