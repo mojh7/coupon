@@ -3,6 +3,7 @@ package com.mojh.cms.common
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.Instant
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -15,11 +16,11 @@ abstract class BaseEntity {
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
-    lateinit var createdAt: LocalDateTime
+    lateinit var createdAt: Instant
 
     @LastModifiedDate
     @Column(updatable = false)
-    lateinit var updatedAt: LocalDateTime
+    lateinit var updatedAt: Instant
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

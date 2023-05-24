@@ -5,7 +5,7 @@ import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode.COUPON_IS_NOT_AVAILABLE
 import com.mojh.cms.member.entity.Member
 import org.springframework.security.access.AccessDeniedException
-import java.time.LocalDateTime
+import java.time.Instant
 import javax.persistence.*
 
 @Entity
@@ -28,7 +28,7 @@ class MemberCoupon constructor(
         protected set
 
     @Column
-    var usedAt: LocalDateTime? = null
+    var usedAt: Instant? = null
         protected set
 
     enum class Status {
@@ -60,7 +60,7 @@ class MemberCoupon constructor(
         }
 
         status = Status.USED
-        usedAt = LocalDateTime.now()
+        usedAt = Instant.now()
     }
 
     private fun isOwner(customer: Member): Boolean {
