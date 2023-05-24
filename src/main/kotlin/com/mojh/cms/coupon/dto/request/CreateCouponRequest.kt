@@ -3,6 +3,7 @@ package com.mojh.cms.coupon.dto.request
 import com.mojh.cms.common.embeddable.Period
 import com.mojh.cms.coupon.entity.Coupon
 import com.mojh.cms.member.entity.Member
+import java.time.Instant
 import java.time.LocalDateTime
 import javax.validation.constraints.Min
 import javax.validation.constraints.NotBlank
@@ -19,9 +20,9 @@ data class CreateCouponRequest(
     @field:Min(value = 1)
     val maxCount: Int,
 
-    val startAt: LocalDateTime,
+    val startAt: Instant,
 
-    val endAt: LocalDateTime
+    val endAt: Instant
 ) {
     fun toCoupon(seller: Member) = Coupon(
         seller = seller,

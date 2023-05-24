@@ -4,6 +4,7 @@ import com.mojh.cms.common.BaseEntity
 import com.mojh.cms.common.embeddable.Period
 import com.mojh.cms.member.entity.Member
 import org.springframework.security.access.AccessDeniedException
+import java.time.Instant
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -44,7 +45,7 @@ class Coupon(
     }
 
     fun isAvailable(): Boolean {
-        val now = LocalDateTime.now()
+        val now = Instant.now()
         if (status != Status.ENABLED || !availablePeriod.contains(now)) {
             return false
         }
