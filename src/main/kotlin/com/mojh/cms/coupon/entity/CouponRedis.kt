@@ -34,8 +34,8 @@ class CouponRedis(
 
     // TODO: LocalDateTime -> Instant로 변경
     @Column
-    var startAt: Long = availablePeriod.startAt.toInstant(ZoneOffset.UTC).toEpochMilli()
+    var startAt: Long = availablePeriod.startAt.toEpochMilli()
 
     @Column
-    var endAt: Long = availablePeriod.endAt.toInstant(ZoneOffset.UTC).toEpochMilli()
+    var endAt: Long = availablePeriod.endAt.toEpochMilli()
 }

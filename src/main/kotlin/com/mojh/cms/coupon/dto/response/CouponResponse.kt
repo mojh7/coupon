@@ -1,6 +1,7 @@
 package com.mojh.cms.coupon.dto.response
 
 import com.mojh.cms.coupon.entity.Coupon
+import java.time.Instant
 import java.time.LocalDateTime
 
 data class CouponResponse private constructor(
@@ -8,8 +9,8 @@ data class CouponResponse private constructor(
     val description: String,
     val maxCount: Int,
     val status: Coupon.Status,
-    val startAt: LocalDateTime,
-    val endAt: LocalDateTime
+    val startAt: Instant,
+    val endAt: Instant
 ) {
     companion object {
         fun from(coupon: Coupon) = CouponResponse(
