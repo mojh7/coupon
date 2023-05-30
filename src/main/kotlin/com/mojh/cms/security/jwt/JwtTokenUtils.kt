@@ -3,16 +3,17 @@ package com.mojh.cms.security.jwt
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode.EXPIRED_TOKEN
 import com.mojh.cms.common.exception.ErrorCode.INVALID_TOKEN
-import com.mojh.cms.security.ACCESS_TOKEN_REDIS_KEY_PREFIX
-import com.mojh.cms.security.BEARER_PREFIX
-import com.mojh.cms.security.REFRESH_TOKEN_REDIS_KEY_PREFIX
+import com.mojh.cms.security.*
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Header
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.crypto.SecretKey
@@ -22,37 +23,35 @@ import javax.crypto.SecretKey
 class JwtTokenUtils(
     private val redisTemplate: RedisTemplate<String, Any>
 ) {
-    @Value("\${jwt.secret-key}")
-    private val SECRET_KEY_RAW: String = ""
-
     @Value("\${jwt.access-token-valid-time}")
     private val ACCESS_TOKEN_VALID_TIME: Long = 0
 
     @Value("\${jwt.refresh-token-valid-time}")
     private val REFRESH_TOKEN_VALID_TIME: Long = 0
 
+    @Value("\${jwt.secret-key}")
+    private lateinit var SECRET_KEY_RAW: String
     private val SECRET_KEY: SecretKey by lazy {
         Keys.hmacShaKeyFor(SECRET_KEY_RAW.toByteArray())
     }
 
     fun createAccessToken(accountId: String): String {
-        val now = Date()
+        val now = Instant.now()
         return Jwts.builder()
-            .setHeaderParam("typ", "JWT")
-            .setSubject("access")
-            .claim("id", accountId)
-            .setIssuedAt(now)
-            .setExpiration(Date(now.time + ACCESS_TOKEN_VALID_TIME))
+            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+            .claim(ACCOUNT_ID, accountId)
+            .setIssuedAt(Date.from(now))
+            .setExpiration(Date.from(now.plusMillis(ACCESS_TOKEN_VALID_TIME)))
             .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
             .compact()
     }
 
     fun createRefreshToken(): String {
-        val now = Date()
+        val now = Instant.now()
         return Jwts.builder()
-            .setHeaderParam("typ", "JWT")
-            .setIssuedAt(now)
-            .setExpiration(Date(now.time + REFRESH_TOKEN_VALID_TIME))
+            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+            .setIssuedAt(Date.from(now))
+            .setExpiration(Date.from(now.plusMillis(REFRESH_TOKEN_VALID_TIME)))
             .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
             .compact()
     }
@@ -64,17 +63,16 @@ class JwtTokenUtils(
     fun parseAccountId(accessToken: String): String {
         return try {
             Jwts.parserBuilder()
-                .requireSubject("access")
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(accessToken)
-                .body["id"] as String
+                .body[ACCOUNT_ID] as String
         } catch (ex: ExpiredJwtException) {
-            if (ex.claims["sub"] != "access") {
+            if (ex.claims[Claims.SUBJECT] != "ACCESS") {
                 throw CouponApplicationException(INVALID_TOKEN)
             }
             // 만료된 AccessToken 재발급에 필요한 로직이라 만료 됐어도 parsing
-            ex.claims["id"] as String
+            ex.claims[ACCOUNT_ID] as String
         } catch (ex: Exception) {
             throw CouponApplicationException(INVALID_TOKEN, ex)
         }
@@ -83,19 +81,20 @@ class JwtTokenUtils(
     /**
      * 남은 만료 시간 milliseconds 단위로 반환
      */
-    fun getRemainingExpirationTime(token: String) =
+    fun getRemainingExpirationTime(token: String): Long =
         try {
             Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
-                .body.expiration.time - Date().time
+                .body.expiration.time - Instant.now().toEpochMilli()
         } catch (ex: Exception) {
             when (ex) {
                 is ExpiredJwtException -> throw CouponApplicationException(EXPIRED_TOKEN, ex)
                 else -> throw CouponApplicationException(INVALID_TOKEN, ex)
             }
         }
+
 
     fun validateToken(token: String) =
         try {
