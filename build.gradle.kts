@@ -19,7 +19,8 @@ repositories {
     mavenCentral()
 }
 
-val kotestVersion = "5.2.1"
+val KOTEST_VERSION = "5.2.1"
+val JJWT_Version = "0.11.2"
 
 dependencies {
     // web
@@ -33,9 +34,9 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
 
     // jjwt
-    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2")
+    implementation("io.jsonwebtoken:jjwt-api:$JJWT_Version")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$JJWT_Version")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$JJWT_Version")
 
     // kotlin
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -68,9 +69,9 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:3.0.1")
 
     // kotest
-    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion") // for kotest framework
-    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion") // for kotest core jvm assertions
-    testImplementation("io.kotest:kotest-property:$kotestVersion") // for kotest property test
+    testImplementation("io.kotest:kotest-runner-junit5:$KOTEST_VERSION") // for kotest framework
+    testImplementation("io.kotest:kotest-assertions-core:$KOTEST_VERSION") // for kotest core jvm assertions
+    testImplementation("io.kotest:kotest-property:$KOTEST_VERSION") // for kotest property test
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0") // spring extensions
 }
 
