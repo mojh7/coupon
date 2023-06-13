@@ -23,16 +23,22 @@ import javax.crypto.SecretKey
 class JwtTokenUtils(
     private val redisTemplate: RedisTemplate<String, Any>
 ) {
-    @Value("\${jwt.access-token-valid-time}")
+    @Value("\${jwt.access.token-valid-time}")
     private val ACCESS_TOKEN_VALID_TIME: Long = 0
 
-    @Value("\${jwt.refresh-token-valid-time}")
+    @Value("\${jwt.refresh.token-valid-time}")
     private val REFRESH_TOKEN_VALID_TIME: Long = 0
 
-    @Value("\${jwt.secret-key}")
-    private lateinit var SECRET_KEY_RAW: String
-    private val SECRET_KEY: SecretKey by lazy {
-        Keys.hmacShaKeyFor(SECRET_KEY_RAW.toByteArray())
+    @Value("\${jwt.access.secret-key}")
+    private lateinit var ACCESS_TOKEN_SECRET_KEY_RAW: String
+    private val ACCESS_TOKEN_SECRET_KEY: SecretKey by lazy {
+        Keys.hmacShaKeyFor(ACCESS_TOKEN_SECRET_KEY_RAW.toByteArray())
+    }
+
+    @Value("\${jwt.refresh.secret-key}")
+    private lateinit var REFRESH_TOKEN_SECRET_KEY_RAW: String
+    private val REFRESH_TOKEN_SECRET_KEY: SecretKey by lazy {
+        Keys.hmacShaKeyFor(REFRESH_TOKEN_SECRET_KEY_RAW.toByteArray())
     }
 
     fun createAccessToken(accountId: String): String {
@@ -42,7 +48,7 @@ class JwtTokenUtils(
             .claim(ACCOUNT_ID, accountId)
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(now.plusMillis(ACCESS_TOKEN_VALID_TIME)))
-            .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
+            .signWith(ACCESS_TOKEN_SECRET_KEY, SignatureAlgorithm.HS512)
             .compact()
     }
 
@@ -52,7 +58,7 @@ class JwtTokenUtils(
             .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(now.plusMillis(REFRESH_TOKEN_VALID_TIME)))
-            .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
+            .signWith(REFRESH_TOKEN_SECRET_KEY, SignatureAlgorithm.HS512)
             .compact()
     }
 
@@ -63,7 +69,7 @@ class JwtTokenUtils(
     fun parseAccountId(accessToken: String): String {
         return try {
             Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(ACCESS_TOKEN_SECRET_KEY)
                 .build()
                 .parseClaimsJws(accessToken)
                 .body[ACCOUNT_ID] as String
@@ -84,7 +90,7 @@ class JwtTokenUtils(
     fun getRemainingExpirationTime(token: String): Long =
         try {
             Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(ACCESS_TOKEN_SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
                 .body.expiration.time - Instant.now().toEpochMilli()
@@ -99,7 +105,7 @@ class JwtTokenUtils(
     fun validateToken(token: String) =
         try {
             Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(ACCESS_TOKEN_SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
             true
