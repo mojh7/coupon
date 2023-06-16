@@ -33,6 +33,9 @@ spring:
       enabled: true
 
 jwt:
-  secret-key: 'jwttestplocaltestsecretkey1q2w3e4r!Useasecretkeyofatleast64bytes'
-  access-token-valid-time: 90000
-  refresh-token-valid-time: 150000
+  access:
+    secret-key: 'jwttestplocaltestsecretkey1q2w3e4r!Useasecretkeyofatleast64bytes'
+    expiration: 90000
+  refresh:
+    secret-key: 'jwttokenlocaltestsecretkey1q2w3e4r!Useasecretkeyofatleast64bytesRT'
+    expiration: 150000

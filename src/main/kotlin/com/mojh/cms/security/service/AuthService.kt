@@ -5,7 +5,6 @@ import com.mojh.cms.common.exception.ErrorCode.*
 import com.mojh.cms.member.repository.MemberRepository
 import com.mojh.cms.security.dto.TokensResponse
 import com.mojh.cms.security.dto.request.LoginRequest
-import com.mojh.cms.security.jwt.JwtTokenUtils
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,9 +14,8 @@ import org.springframework.transaction.annotation.Transactional
 class AuthService(
     private val memberRepository: MemberRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtTokenUtils: JwtTokenUtils
+    private val jwtService: JwtService
 ) {
-
 
     @Transactional
     fun login(loginRequest: LoginRequest): TokensResponse {
@@ -28,49 +26,40 @@ class AuthService(
             throw CouponApplicationException(PASSWORD_NOT_MATCHED)
         }
 
-        val accessToken = jwtTokenUtils.createAccessToken(loginRequest.accountId)
-        val refreshToken = jwtTokenUtils.createRefreshToken()
+        val accessToken = jwtService.generateAccessToken(loginRequest.accountId)
+        val refreshToken = jwtService.generateRefreshToken()
 
-        jwtTokenUtils.addRefreshToken(loginRequest.accountId, refreshToken)
+        jwtService.addRefreshToken(loginRequest.accountId, refreshToken)
 
         return TokensResponse(accessToken, refreshToken)
     }
 
     @Transactional
     fun logout(accessTokenHeader: String?, refreshToken: String) {
-        jwtTokenUtils.validateToken(refreshToken)
+        jwtService.validateAccessToken(refreshToken)
 
-        val accessToken = accessTokenHeader?.let { jwtTokenUtils.extractTokenFrom(it) } ?: throw CouponApplicationException(INVALID_TOKEN)
-        val accountId = jwtTokenUtils.parseAccountId(accessToken)
-
-        if (jwtTokenUtils.isBlockedAccessToken(accountId, accessToken)) {
-            throw CouponApplicationException(ALREADY_LOGGED_OUT_MEMBER)
-        }
+        val accessToken = accessTokenHeader?.let { jwtService.extractAccessTokenFrom(it) } ?: throw CouponApplicationException(INVALID_TOKEN)
+        val accountId = jwtService.parseAccountIdFromAccessToken(accessToken)
 
         // refresh token redis에서 제거
-        if (!jwtTokenUtils.containsRefreshToken(accountId, refreshToken)) {
+        if (!jwtService.containsRefreshToken(accountId, refreshToken)) {
             throw CouponApplicationException(ALREADY_LOGGED_OUT_MEMBER)
         }
-        jwtTokenUtils.removeRefreshToken(accountId, refreshToken)
-
-        // access token blacklist 등록
-        jwtTokenUtils.addAccessTokenBlackList(accountId, accessToken)
+        jwtService.removeRefreshToken(accountId, refreshToken)
     }
 
     @Transactional(readOnly = true)
     fun reissueAccessToken(accessTokenHeader: String?, refreshToken: String): String {
-        val accountId: String = accessTokenHeader?.let {
-            jwtTokenUtils.extractTokenFrom(it)
-        }?.let {
-            jwtTokenUtils.parseAccountId(it)
+        val accountId: String = jwtService.extractAccessTokenFrom(accessTokenHeader)?.let {
+            jwtService.parseAccountIdFromAccessToken(it)
         } ?: throw CouponApplicationException(INVALID_TOKEN)
 
-        jwtTokenUtils.validateToken(refreshToken)
+        jwtService.validateRefreshToken(refreshToken)
 
-        if (!jwtTokenUtils.containsRefreshToken(accountId, refreshToken)) {
+        if (!jwtService.containsRefreshToken(accountId, refreshToken)) {
             throw CouponApplicationException(NEED_TO_LOGIN_AGAIN)
         }
 
-        return jwtTokenUtils.createAccessToken(accountId)
+        return jwtService.generateAccessToken(accountId)
     }
 }
