@@ -24,18 +24,12 @@ class CouponRedis(
     @Id
     val id: Long = id
 
-    @Column(nullable = false)
     var maxCount: Int = maxCount;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     var status: Coupon.Status = status
         protected set
 
-    // TODO: LocalDateTime -> Instant로 변경
-    @Column
     var startAt: Long = availablePeriod.startAt.toEpochMilli()
 
-    @Column
     var endAt: Long = availablePeriod.endAt.toEpochMilli()
 }

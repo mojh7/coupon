@@ -44,15 +44,7 @@ class JwtService(
 
     fun <T> parseClaimFromRefreshToken(refreshToken: String, claimName: String): T = refreshTokenUtils.parseClaim(refreshToken, claimName)
 
-    fun parseClaimsFromAccessToken(accessToken: String): Map<String, Any> = accessTokenUtils.parseClaims(accessToken)
-
     fun parseClaimsFromRefreshToken(refreshToken: String): Map<String, Any> = refreshTokenUtils.parseClaims(refreshToken)
-
-    /**
-     * 남은 만료 시간 milliseconds 단위로 반환
-     */
-    fun getRemainingExpirationTimeFromAccessToken(accessToken: String): Long =
-        accessTokenUtils.getRemainingExpirationTime(accessToken)
 
     /**
      * 남은 만료 시간 milliseconds 단위로 반환
