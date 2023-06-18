@@ -14,8 +14,6 @@ const val AUTH_EXCEPTION_INFO = "AUTH_EXCEPTION_INFO"
 
 const val BEARER_PREFIX = "Bearer "
 
-const val ACCESS_TOKEN_REDIS_KEY_PREFIX = "AT:"
+const val ACCOUNT_ID_CLAIM_NAME = "id"
 
-const val REFRESH_TOKEN_REDIS_KEY_PREFIX = "RT:"
-
-const val ACCOUNT_ID = "id"
+const val REFRESH_TOKEN_CHAIN_CLAIM_NAME = "tokenChain"

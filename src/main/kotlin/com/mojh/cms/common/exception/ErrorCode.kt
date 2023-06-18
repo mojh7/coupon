@@ -19,7 +19,8 @@ enum class ErrorCode(
     NEED_TO_LOGIN_AGAIN(UNAUTHORIZED, "104", "다시 로그인해야 합니다."),
     INVALID_TOKEN(UNAUTHORIZED, "105", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(UNAUTHORIZED, "106", "만료된 토큰입니다."),
-    ALREADY_LOGGED_OUT_MEMBER(UNAUTHORIZED, "107", "이미 로그아웃 처리된 멤버입니다."),
+    ALREADY_LOGGED_OUT(UNAUTHORIZED, "107", "이미 로그아웃 처리된 유저입니다."),
+    NOT_TOKENS_FROM_SAME_ACCOUNT(UNAUTHORIZED, "108", "동일한 계정에서 생성된 access token과 refresh token이 아닙니다."),
 
     // coupon
     COUPON_NOT_FOUND(NOT_FOUND, "200", "해당 쿠폰 정보를 찾을 수 없습니다."),

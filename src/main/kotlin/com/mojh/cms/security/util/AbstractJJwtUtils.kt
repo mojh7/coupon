@@ -20,8 +20,6 @@ abstract class AbstractJJwtUtils : JwtUtils {
 
     protected abstract val SECRET_KEY: SecretKey
 
-    override fun generateToken() = generateToken(Collections.emptyMap())
-
     override fun generateToken(claims: Map<String, Any>): String {
         val now = Instant.now()
         return Jwts.builder()
@@ -33,13 +31,24 @@ abstract class AbstractJJwtUtils : JwtUtils {
             .compact()
     }
 
-    override fun validateToken(token: String): Boolean {
+    override fun generateToken(claims: Map<String, Any>, tokenId: String): String {
+        val now = Instant.now()
+        return Jwts.builder()
+            .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+            .setClaims(claims)
+            .setId(tokenId)
+            .setIssuedAt(Date.from(now))
+            .setExpiration(Date.from(now.plusMillis(EXPIRATION)))
+            .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
+            .compact()
+    }
+
+    override fun validateToken(token: String) {
         try {
             Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)
-            return true
         } catch (ex: Exception) {
             when (ex) {
                 is ExpiredJwtException -> throw CouponApplicationException(ErrorCode.EXPIRED_TOKEN, ex)
@@ -48,6 +57,11 @@ abstract class AbstractJJwtUtils : JwtUtils {
         }
     }
 
+    override fun <T> parseClaim(token: String, claimName: String): T = parseClaims(token)[claimName] as T
+
+    /**
+     * jwt 사용하는 로직 특정상 invalid toekn이 아니라면 만료됐어도 claim 얻는게 가능하다
+     */
     override fun parseClaims(token: String): Map<String, Any> {
         return try {
             Jwts.parserBuilder()

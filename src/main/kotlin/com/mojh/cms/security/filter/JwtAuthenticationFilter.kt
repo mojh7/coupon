@@ -1,6 +1,7 @@
 package com.mojh.cms.security.filter
 
 import com.mojh.cms.common.exception.CouponApplicationException
+import com.mojh.cms.security.ACCOUNT_ID_CLAIM_NAME
 import com.mojh.cms.security.AUTH_EXCEPTION_INFO
 import com.mojh.cms.security.service.JwtService
 import com.mojh.cms.security.service.UserDetailsServiceImpl
@@ -30,7 +31,7 @@ class JwtAuthenticationFilter(
         try {
             jwtService.extractAccessTokenFrom(request.getHeader(AUTHORIZATION))?.let{
                 jwtService.validateAccessToken(it)
-                val accountId = jwtService.parseAccountIdFromAccessToken(it)
+                val accountId: String = jwtService.parseClaimFromAccessToken(it, ACCOUNT_ID_CLAIM_NAME)
 
                 val memberAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
                 SecurityContextHolder.getContext().authentication =
