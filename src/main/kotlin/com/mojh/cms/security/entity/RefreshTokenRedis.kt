@@ -22,7 +22,11 @@ class RefreshTokenRedis(
     }
 
     @Id
-    val id: String = generateId(accountId, tokenChainId)
+    var id: String = generateId(accountId, tokenChainId)
+
+    val accountId: String = accountId
+
+    val tokenChainId: String = tokenChainId
 
     var tokenId: String = tokenId
         protected set
