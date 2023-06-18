@@ -20,6 +20,8 @@ abstract class AbstractJJwtUtils : JwtUtils {
 
     protected abstract val SECRET_KEY: SecretKey
 
+    protected abstract val SIGNATURE_ALGORITHM: SignatureAlgorithm
+
     override fun generateToken(claims: Map<String, Any>): String {
         val now = Instant.now()
         return Jwts.builder()
@@ -27,7 +29,7 @@ abstract class AbstractJJwtUtils : JwtUtils {
             .setClaims(claims)
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(now.plusMillis(EXPIRATION)))
-            .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
+            .signWith(SECRET_KEY, SIGNATURE_ALGORITHM)
             .compact()
     }
 
@@ -39,7 +41,7 @@ abstract class AbstractJJwtUtils : JwtUtils {
             .setId(tokenId)
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(now.plusMillis(EXPIRATION)))
-            .signWith(SECRET_KEY, SignatureAlgorithm.HS512)
+            .signWith(SECRET_KEY, SIGNATURE_ALGORITHM)
             .compact()
     }
 
@@ -57,7 +59,9 @@ abstract class AbstractJJwtUtils : JwtUtils {
         }
     }
 
-    override fun <T> parseClaim(token: String, claimName: String): T = parseClaims(token)[claimName] as T
+    override fun <T> parseClaim(token: String, claimName: String): T {
+        return parseClaims(token)[claimName] as T ?: throw CouponApplicationException(INVALID_TOKEN)
+    }
 
     /**
      * jwt 사용하는 로직 특정상 invalid toekn이 아니라면 만료됐어도 claim 얻는게 가능하다

@@ -1,5 +1,6 @@
 package com.mojh.cms.security.util
 
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -16,4 +17,6 @@ class RefreshTokenUtils : AbstractJJwtUtils() {
     override val SECRET_KEY: SecretKey by lazy {
         Keys.hmacShaKeyFor(REFRESH_TOKEN_SECRET_KEY_RAW.toByteArray())
     }
+
+    override val SIGNATURE_ALGORITHM: SignatureAlgorithm = SignatureAlgorithm.HS512
 }
