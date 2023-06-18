@@ -27,8 +27,8 @@ class AuthService(
             throw CouponApplicationException(PASSWORD_NOT_MATCHED)
         }
 
-        val accessToken = jwtService.generateAccessToken(loginRequest.accountId)
-        val refreshToken = jwtService.generateRefreshToken(loginRequest.accountId)
+        val accessToken = jwtService.generateAccessToken(member.accountId)
+        val refreshToken = jwtService.generateRefreshToken(member.accountId)
 
         jwtService.saveRefreshToken(refreshToken)
 
