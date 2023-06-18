@@ -2,6 +2,7 @@ package com.mojh.cms.security.entity
 
 import org.springframework.data.redis.core.RedisHash
 import org.springframework.data.redis.core.TimeToLive
+import java.util.concurrent.TimeUnit
 import javax.persistence.Id
 
 
@@ -23,6 +24,7 @@ class RefreshTokenRedis(
 
     @Id
     var id: String = generateId(accountId, tokenChainId)
+        protected set
 
     val accountId: String = accountId
 
@@ -31,7 +33,7 @@ class RefreshTokenRedis(
     var tokenId: String = tokenId
         protected set
 
-    @TimeToLive
+    @TimeToLive(unit = TimeUnit.MILLISECONDS)
     var ttl: Long = ttl
         protected set
 }
