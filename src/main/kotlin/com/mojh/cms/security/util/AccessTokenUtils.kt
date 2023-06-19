@@ -8,7 +8,7 @@ import javax.crypto.SecretKey
 
 @Component
 class AccessTokenUtils : AbstractJJwtUtils() {
-    @Value("\${jwt.access.expiration}")
+    @Value("\${jwt.access.token-valid-time}")
     override val EXPIRATION: Long = 0
 
     @Value("\${jwt.access.secret-key}")

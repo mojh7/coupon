@@ -8,7 +8,7 @@ import javax.crypto.SecretKey
 
 @Component
 class RefreshTokenUtils : AbstractJJwtUtils() {
-    @Value("\${jwt.refresh.expiration}")
+    @Value("\${jwt.refresh.token-valid-time}")
     override val EXPIRATION: Long = 0
 
     @Value("\${jwt.refresh.secret-key}")
