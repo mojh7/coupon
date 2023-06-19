@@ -1,10 +1,10 @@
-package com.mojh.cms.security.jwt
+package com.mojh.cms.security.filter
 
 import com.mojh.cms.common.exception.CouponApplicationException
-import com.mojh.cms.common.exception.ErrorCode
-import com.mojh.cms.security.AUTH_EXCEPTION_INFO
-import com.mojh.cms.security.AUTH_GET_URL
-import com.mojh.cms.security.AUTH_POST_URL
+import com.mojh.cms.member.repository.MemberRepository
+import com.mojh.cms.security.*
+import com.mojh.cms.security.member.MemberAdapter
+import com.mojh.cms.security.service.JwtService
 import com.mojh.cms.security.service.UserDetailsServiceImpl
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class JwtAuthenticationFilter(
-    private val jwtTokenUtils: JwtTokenUtils,
+    private val jwtService: JwtService,
     private val userDetailsServiceImpl: UserDetailsServiceImpl
 ) : OncePerRequestFilter() {
 
@@ -32,12 +32,9 @@ class JwtAuthenticationFilter(
         filterChain: FilterChain
     ) {
         try {
-            jwtTokenUtils.extractTokenFrom(request.getHeader(AUTHORIZATION))?.let{
-                jwtTokenUtils.validateToken(it)
-                val accountId = jwtTokenUtils.parseAccountId(it)
-                if (jwtTokenUtils.isBlockedAccessToken(accountId, it)) {
-                    throw CouponApplicationException(ErrorCode.ALREADY_LOGGED_OUT_MEMBER)
-                }
+            jwtService.extractAccessTokenFrom(request.getHeader(AUTHORIZATION))?.let{
+                jwtService.validateAccessToken(it)
+                val accountId: String = jwtService.parseClaimFromAccessToken(it, ACCOUNT_ID_CLAIM_NAME)
 
                 val memberAdapter = userDetailsServiceImpl.loadUserByUsername(accountId)
                 SecurityContextHolder.getContext().authentication =

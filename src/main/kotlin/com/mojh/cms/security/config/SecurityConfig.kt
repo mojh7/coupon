@@ -4,7 +4,7 @@ import com.mojh.cms.security.AUTH_GET_URL
 import com.mojh.cms.security.AUTH_POST_URL
 import com.mojh.cms.security.exception.CustomAccessDeniedHandler
 import com.mojh.cms.security.exception.CustomAuthenticationEntryPoint
-import com.mojh.cms.security.jwt.JwtAuthenticationFilter
+import com.mojh.cms.security.filter.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
@@ -30,12 +30,13 @@ class SecurityConfig(
             httpBasic { disable() }
             csrf { disable() }
             sessionManagement { SessionCreationPolicy.STATELESS }
-            // 구체적인 경로를 더 먼저 선언
+            // 구체적인 경로를 먼저 선언
             authorizeRequests {
                 authorize("/seller/**", hasRole("SELLER"))
                 authorize("/customer/**", hasRole("CUSTOMER"))
                 AUTH_GET_URL.forEach { authorize(HttpMethod.GET, it, authenticated) }
                 AUTH_POST_URL.forEach { authorize(HttpMethod.POST, it, authenticated) }
+                authorize("/test", authenticated)
                 authorize(anyRequest, permitAll)
             }
             addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)

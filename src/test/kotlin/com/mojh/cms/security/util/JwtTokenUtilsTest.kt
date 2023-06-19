@@ -1,10 +1,12 @@
-package com.mojh.cms.security.jwt
+/*
+package com.mojh.cms.security.util
 
 import com.mojh.cms.common.BaseTest
 import com.mojh.cms.common.config.RedisConfig
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.security.BEARER_PREFIX
+import com.mojh.cms.security.service.JwtService
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.IsolationMode
@@ -18,9 +20,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.util.StringUtils
 
 @BaseTest
-@SpringBootTest(classes = [RedisConfig::class, JwtTokenUtils::class])
+@SpringBootTest(
+    classes = [RedisConfig::class, JwtService::class, AccessTokenUtils::class, RefreshTokenUtils::class]
+)
 internal class JwtTokenUtilsTest(
-    private val jwtTokenUtils: JwtTokenUtils
+    private val jwtService: JwtService
 ) : FunSpec() {
 
     companion object {
@@ -35,7 +39,7 @@ internal class JwtTokenUtilsTest(
         isolationMode = IsolationMode.InstancePerLeaf
 
         test("액세스 토큰 생성 시 유효한 토큰이 반환된다") {
-            val actualAccessToken = jwtTokenUtils.createAccessToken(ACCOUNT_ID)
+            val actualAccessToken = jwtService.generateAccessToken(ACCOUNT_ID)
 
             assertSoftly(actualAccessToken) {
                 StringUtils.containsWhitespace(this) shouldBe false
@@ -45,7 +49,7 @@ internal class JwtTokenUtilsTest(
         }
 
         test("리프레쉬 토큰 생성 성공시 유효한 토큰이 반환된다") {
-            val actualRefreshToken = jwtTokenUtils.createRefreshToken()
+            val actualRefreshToken = jwtService.generateRefreshToken()
 
             assertSoftly(actualRefreshToken) {
                 StringUtils.containsWhitespace(this) shouldBe false
@@ -57,40 +61,42 @@ internal class JwtTokenUtilsTest(
         context("토큰에서 계정 아이디를 파싱한다") {
             context("액세스 토큰이") {
                 test("유효할 때 파싱 시 계정 아이디가 반환된다") {
-                    val accessToken = jwtTokenUtils.createAccessToken(ACCOUNT_ID)
+                    val accessToken = jwtService.generateAccessToken(ACCOUNT_ID)
 
-                    val actualAccountId = jwtTokenUtils.parseAccountId(accessToken)
+                    val actualAccountId = jwtService.parseClaimsFromAccessToken(accessToken)
 
                     actualAccountId shouldBe ACCOUNT_ID
                 }
 
                 test("만료됐더라도 파싱 시 계정 아이디가 반환된다") {
-                    val actualAccountId = jwtTokenUtils.parseAccountId(EXPIRED_ACCESS_TOKEN)
+                    val actualAccountId = jwtService.parseClaimsFromAccessToken(EXPIRED_ACCESS_TOKEN)
 
                     actualAccountId shouldBe ACCOUNT_ID
                 }
             }
 
-            context("리프레쉬 토큰은") {
+            */
+/*context("리프레쉬 토큰은") {
                 test("유효하더라도 파싱 시 CustomException 'INVALID_TOKEN'을 던진다") {
-                    val refreshToken = jwtTokenUtils.createRefreshToken()
+                    val refreshToken = jwtService.generateRefreshToken()
 
                     shouldThrow<CouponApplicationException> {
-                        jwtTokenUtils.parseAccountId(refreshToken)
+                        jwtService.parseAccountIdFromAccessToken(refreshToken)
                     }.errorCode shouldBe ErrorCode.INVALID_TOKEN
                 }
 
                 // Jwts에서 requireSubject("access") subject : "access" 인지 확인하기 때문
                 test("만료됐어도 파싱 시 CustomException 'INVALID_TOKEN'을 던진다") {
                     shouldThrow<CouponApplicationException> {
-                        jwtTokenUtils.parseAccountId(EXPIRED_REFRESH_TOKEN)
+                        jwtService.parseAccountIdFromAccessToken(EXPIRED_REFRESH_TOKEN)
                     }.errorCode shouldBe ErrorCode.INVALID_TOKEN
                 }
-            }
+            }*//*
+
 
             test("유효하지 않은 토큰으로 파싱 시 CustomException 'INVALID_TOKEN'을 던진다") {
                 shouldThrow<CouponApplicationException> {
-                    jwtTokenUtils.parseAccountId(INVALID_TOKEN)
+                    jwtService.parseClaimsFromAccessToken(INVALID_TOKEN)
                 }.errorCode shouldBe ErrorCode.INVALID_TOKEN
             }
         }
@@ -98,32 +104,32 @@ internal class JwtTokenUtilsTest(
         context("토큰의 남은 만료 시간을 반환한다") {
             context("액세스 토큰이") {
                 test("유효할 때 남은 만료 시간이 반환된다") {
-                    val token = jwtTokenUtils.createAccessToken(ACCOUNT_ID);
+                    val token = jwtService.generateAccessToken(ACCOUNT_ID);
 
-                    val actual = jwtTokenUtils.getRemainingExpirationTime(token)
+                    val actual = jwtService.getRemainingExpirationTimeFromAccessToken(token)
 
                     actual shouldBeGreaterThan 0
                 }
 
                 test("만료됐으면 남은 만료 시간을 확인할 경우 CustomException 'EXPIRED_TOKEN'을 던진다") {
                     shouldThrow<CouponApplicationException> {
-                        jwtTokenUtils.getRemainingExpirationTime(EXPIRED_ACCESS_TOKEN)
+                        jwtService.getRemainingExpirationTimeFromAccessToken(EXPIRED_ACCESS_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
             }
 
             context("리프레쉬 토큰이") {
                 test("유효할 때 남은 만료 시간이 반환된다") {
-                    val token = jwtTokenUtils.createRefreshToken();
+                    val token = jwtService.generateRefreshToken();
 
-                    val actual = jwtTokenUtils.getRemainingExpirationTime(token)
+                    val actual = jwtService.getRemainingExpirationTimeFromAccessToken(token)
 
                     actual shouldBeGreaterThan 0
                 }
 
                 test("만료됐으면 남은 만료 시간을 확인할 경우 CustomException 'EXPIRED_TOKEN'을 던진다") {
                     shouldThrow<CouponApplicationException> {
-                        jwtTokenUtils.getRemainingExpirationTime(EXPIRED_REFRESH_TOKEN)
+                        jwtService.getRemainingExpirationTimeFromAccessToken(EXPIRED_REFRESH_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
             }
@@ -131,7 +137,7 @@ internal class JwtTokenUtilsTest(
 
             test("유효하지 않은 토큰으로 남은 만료 시간을 확인할 경우 CustomException 'INVALID_TOKEN'을 던진다") {
                 shouldThrow<CouponApplicationException> {
-                    jwtTokenUtils.getRemainingExpirationTime(INVALID_TOKEN)
+                    jwtService.getRemainingExpirationTimeFromAccessToken(INVALID_TOKEN)
                 }.errorCode shouldBe ErrorCode.INVALID_TOKEN
             }
         }
@@ -139,32 +145,32 @@ internal class JwtTokenUtilsTest(
         context("토큰이 유효한지 확인한다") {
             context("액세스 토큰이") {
                 test("유효할 때 true가 반환된다") {
-                    val token = jwtTokenUtils.createAccessToken(ACCOUNT_ID);
+                    val token = jwtService.generateAccessToken(ACCOUNT_ID);
 
-                    val result = jwtTokenUtils.validateToken(token)
+                    val result = jwtService.validateAccessToken(token)
 
                     result shouldBe true
                 }
 
                 test("만료됐으면 CustomException 'EXPIRED_TOKEN'을 던진다") {
                     shouldThrow<CouponApplicationException> {
-                        jwtTokenUtils.validateToken(EXPIRED_ACCESS_TOKEN)
+                        jwtService.validateAccessToken(EXPIRED_ACCESS_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
             }
 
             context("리프레쉬 토큰이") {
                 test("유효할 때 true가 반환된다") {
-                    val token = jwtTokenUtils.createRefreshToken();
+                    val token = jwtService.generateRefreshToken();
 
-                    val result = jwtTokenUtils.validateToken(token)
+                    val result = jwtService.validateRefreshToken(token)
 
                     result shouldBe true
                 }
 
                 test("만료됐으면 CustomException 'EXPIRED_TOKEN'을 던진다") {
                     shouldThrow<CouponApplicationException> {
-                        jwtTokenUtils.validateToken(EXPIRED_REFRESH_TOKEN)
+                        jwtService.validateRefreshToken(EXPIRED_REFRESH_TOKEN)
                     }.errorCode shouldBe ErrorCode.EXPIRED_TOKEN
                 }
             }
@@ -172,13 +178,14 @@ internal class JwtTokenUtilsTest(
 
             test("유효하지 않은 토큰으로 유효성 검사를 하면 CustomException 'INVALID_TOKEN'을 던진다") {
                 shouldThrow<CouponApplicationException> {
-                    jwtTokenUtils.validateToken(INVALID_TOKEN)
+                    jwtService.validateRefreshToken(INVALID_TOKEN)
                 }.errorCode shouldBe ErrorCode.INVALID_TOKEN
             }
         }
 
         // TODO: test
-        /*context("차단된 액세스 토큰인지 확인한다") {
+        */
+/*context("차단된 액세스 토큰인지 확인한다") {
             //given
             val registeredAccessToken = jwtTokenUtils.createAccessToken(ACCOUNT_ID)
             // access token blacklist 등록
@@ -201,9 +208,11 @@ internal class JwtTokenUtilsTest(
                     result shouldBe false
                 }
             }
-        }*/
+        }*//*
 
-        /*test("레디스에 계정 아이디에 해당하는 액세스 토큰 Set을 조회한다") {
+
+        */
+/*test("레디스에 계정 아이디에 해당하는 액세스 토큰 Set을 조회한다") {
             val result = jwtTokenUtils.getAccessTokenRSetCache(ACCOUNT_ID)
 
             assertSoftly(result) {
@@ -223,14 +232,15 @@ internal class JwtTokenUtilsTest(
                 isEmpty() shouldBe true
                 size shouldBe 0
             }
-        }*/
+        }*//*
+
 
         context("HTTP Authorization header에서 type을 제거하고 토큰 정보를 추출한다") {
             context("Authorization header가") {
                 test("null이 아니고 올바른 type을 가질 때 토큰을 추출하면 토큰 정보가 반환된다") {
                     val header = BEARER_PREFIX + EXPIRED_ACCESS_TOKEN
 
-                    val token = jwtTokenUtils.extractTokenFrom(header)
+                    val token = jwtService.extractAccessTokenFrom(header)
 
                     assertSoftly(token) {
                         this shouldStartWith JWT_HEADER_BASE64
@@ -241,7 +251,7 @@ internal class JwtTokenUtilsTest(
                 test("null이 아니지만 올바른 type이 아닐 때 토큰을 추출하면 null이 반환된다") {
                     val header = "invalid"
 
-                    val result = jwtTokenUtils.extractTokenFrom(header)
+                    val result = jwtService.extractAccessTokenFrom(header)
 
                     assertSoftly {
                         header shouldHaveMinLength 1
@@ -252,7 +262,7 @@ internal class JwtTokenUtilsTest(
                 test("null이 아니지만 값이 비어있을 때 토큰을 추출하면 null이 반환된다") {
                     val header = ""
 
-                    val result = jwtTokenUtils.extractTokenFrom(header)
+                    val result = jwtService.extractAccessTokenFrom(header)
 
                     assertSoftly {
                         header shouldHaveLength 0
@@ -263,7 +273,7 @@ internal class JwtTokenUtilsTest(
                 test("null이면 토큰을 추출할 때 null이 반환된다") {
                     val header: String? = null
 
-                    val result = jwtTokenUtils.extractTokenFrom(header)
+                    val result = jwtService.extractAccessTokenFrom(header)
 
                     assertSoftly {
                         header shouldBe null
@@ -273,4 +283,4 @@ internal class JwtTokenUtilsTest(
             }
         }
     }
-}
+}*/

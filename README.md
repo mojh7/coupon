@@ -15,12 +15,16 @@
 쿠폰 개수 동시성 이슈 처리
 
 1. 기존 방법 
-   - Redisson 분산 락을 활용하여 처리
-
+   - Redisson 클라이언트의 분산 락을 활용하여 처리
+- 락을 획득한 동안 쿠폰 발급 요건사항 체크와 조건 만족시 쿠폰을 실제로 지급하는 로직 실행
+   - 쿠폰 개수에 대해서만 redis에 저장해서 발급 가능한 쿠폰 개수를 체크하고 member_coupon 테이블을 조회하여 중복 발급 여부를 확인함
+   - 조건 만족시 유저에게 실제로 쿠폰을 지급(MySQL member_coupon 테이블에 유저 쿠폰 정보 저장)하는 로직 실행
+   
 2. 변경 방법
-   - Redis의 Lua Script를 활용하여 처리
-   - Lua Script에서 쿠폰 발급 요건사항 체크와 쿠폰 지급 대상 마킹을 위한 Set 타입의 자료구조에 유저 정보를 넣고 Sorted Set 타입의 자료구조에는 유저에게 실제로 발급할 쿠폰 정보를 담는 로직을 atomic하게 처리
-   - 이후 스케줄러가 돌면서 Redis의 Sorted Set 타입`issuable_coupon_queue`에서 데이터를 가져와 유저에게 실제로 쿠폰을 지급
+   - Redis의 Lua Script를 활용하여 쿠폰 발급 요건사항 체크와 쿠폰 지급 대상 마킹 로직을 atomic하게 처리
+     - 쿠폰 개수 외에도 쿠폰 발급 요건사항에 대한 체크를 redis 내에서 처리해서 더 빠르게 로직이 실행될 수 있게 변경
+     - 선착순 쿠폰 지급 대상 마킹은 쿠폰 발급 요건을 충족한 유저를 Set 타입에 저장하고 Sorted Set 타입에 유저에게 실제로 발급할 쿠폰 id 를 저장
+   - 이후 스케줄러가 돌면서 Redis의 Sorted Set 타입`issuable_coupon_queue`에서 데이터를 가져와 유저에게 실제로 쿠폰을 지급(MySQL member_coupon 테이블에 유저 쿠폰 정보 저장)
 
 <br>
 
@@ -28,15 +32,15 @@
 
 ![architecture](./etc/architecture.png)
 
-## DB
+## DB 구조
 
 ![db](./etc/db.png)
 
-## 기술 스택
+## 사용한 기술 스택
 
 - Kotlin, Kotest, Mockk
-- Spring Boot, Spring Security, Spring Data JPA
-- MySQL, Redis(redisson), nGrinder, GCP
+- Spring Boot, Spring Security, Spring Data JPA, Spring Data Redis
+- MySQL, Redis, nGrinder, GCP
 - Jenkins, JaCoCo, SonarQube
 
 <br>
@@ -48,7 +52,7 @@
 ### 준비
 
 1. 테스트를 위한 더미 데이터 설정
-   - 각 테이블 member 100만, coupon 10만, member_coupon 1000만
+   - 미리 각 테이블 member 100만, coupon 10만, member_coupon 1000만개의 더미 데이터 저장
 
 2. 선착순 이벤트 특성상 유저가 이미 로그인이 완료된 상태에서 쿠폰 다운로드 요청을 보낼 것이라 생각하고 테스트 시나리오를 가정
    - 미리 Access Token 10만 개 설정(유효하지 않은 토큰, 만료된 토큰인 경우들 제외)
@@ -75,11 +79,11 @@
 
 #### 1. 기존 방법 (Redisson Lock 사용)
 
-1. API 서버 2대, vuser = 320, coupon count = 5000
+1. API 서버 2대 (vuser = 320, coupon count = 5000)
 
 ![test-result-1](./etc/test-result-1.jpg)
 
-2. API 서버 2대, vuser = 1600, coupon count = 5000
+2. API 서버 2대 (vuser = 1600, coupon count = 5000)
 
 ![test-result-2](./etc/test-result-2.jpg)
 
@@ -93,12 +97,25 @@
 
 - 선착순 쿠폰 다운로드 요청과 다운로드 요건을 충족한 유저들에게 쿠폰을 실제로 지급하는 로직 분리한 방법
 
-1. 
+1. API 서버 2대 (vuser = 1600, coupon count = 5000)
 
 ![test-result-3](./etc/test-result-3.jpg)
 
+<br>
+
+2. API 서버 4대 (vuser = 1600, coupon count = 5000)
 
 ![test-result-4](./etc/test-result-4.jpg)
 
+- 기존 방법보다 나은 TPS를 볼 수 있고 API 서버를 2대에서 4대로 늘렸을 때 TPS가 상승한 것을 볼 수 있었다
 
+<br>
+
+## Future Work
+
+1. 멀티 모듈로 변경
+   - API와 Batch 모듈 분리해서 각각 따로 배포하도록 수정
+2. APM 도입
+   - 다양한 메트릭을 수집해서 개선
+3. 테스트 커버리지 향상
 

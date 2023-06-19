@@ -29,7 +29,5 @@ class AuthController(
     @PostMapping("/reissue")
     fun reissueAccessToken(@RequestHeader(AUTHORIZATION) accessToken: String?,
                            @Valid @RequestBody reissueTokenRequest: ReissueTokenRequest) =
-        ResponseEntity.ok()
-            .header(AUTHORIZATION, authService.reissueAccessToken(accessToken, reissueTokenRequest.refreshToken))
-            .body(ApiResponse.succeed());
+        ApiResponse.succeed(authService.reissueTokens(accessToken, reissueTokenRequest.refreshToken))
 }
