@@ -63,15 +63,15 @@
 
 ### 서버 사양
 
-- API 서버 (1대당 사양 : 2vCPU RAM 4GB )
+- API 서버 (1대당 사양 : vCPU 2 Core RAM 4GB )
 
-- MySQL 서버 1대 (2vCPU Ram 8GB)
+- MySQL 서버 1대 (vCPU 2 Core Ram 8GB)
 
-- Redis 서버 1대 (2vCPU Ram 8GB)
+- Redis 서버 1대 (vCPU 2 Core Ram 8GB)
 
-- Ngrinder Controller 1대 (2vCPU RAM 4GB)
+- Ngrinder Controller 1대 (vCPU 2 Core RAM 4GB)
 
-- Ngrinder Agent 총 4대 (1대당 사양 : 2vCPU RAM 4GB)
+- Ngrinder Agent 총 4대 (1대당 사양 : vCPU 2 Core RAM 4GB)
 
 <br>
 
@@ -107,15 +107,6 @@
 
 ![test-result-4](./etc/test-result-4.jpg)
 
-- 기존 방법보다 나은 TPS를 볼 수 있고 API 서버를 2대에서 4대로 늘렸을 때 TPS가 상승한 것을 볼 수 있었다
+- 기존 방법보다 TPS가 더 높고 API 서버를 2대에서 4대로 늘렸을 때 TPS가 상승한 것을 볼 수 있었다
 
-<br>
-
-## Future Work
-
-1. 멀티 모듈로 변경
-   - API와 Batch 모듈 분리해서 각각 따로 배포하도록 수정
-2. APM 도입
-   - 다양한 메트릭을 수집해서 개선
-3. 테스트 커버리지 향상
 
