@@ -1,7 +1,7 @@
 /*
 package com.mojh.cms.coupon.service
 
-import com.mojh.cms.common.BaseTest
+import com.mojh.cms.common.annotation.BaseTest
 import com.mojh.cms.coupon.dto.CreateCouponRequest
 import com.mojh.cms.coupon.repository.MemberCouponRepository
 import com.mojh.cms.member.entity.Member

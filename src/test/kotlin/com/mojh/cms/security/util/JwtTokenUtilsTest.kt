@@ -1,7 +1,7 @@
 /*
 package com.mojh.cms.security.util
 
-import com.mojh.cms.common.BaseTest
+import com.mojh.cms.common.annotation.BaseTest
 import com.mojh.cms.common.config.RedisConfig
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode

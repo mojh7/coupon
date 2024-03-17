@@ -2,7 +2,6 @@ package com.mojh.cms.coupon.entity
 
 import com.mojh.cms.common.embeddable.Period
 import org.springframework.data.redis.core.RedisHash
-import java.time.ZoneOffset
 import javax.persistence.*
 
 @RedisHash("coupon")

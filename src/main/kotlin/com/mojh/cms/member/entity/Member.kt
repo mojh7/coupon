@@ -11,11 +11,11 @@ class Member(
     password: String,
     role: Role,
 ): BaseEntity() {
-    @Column(length = 16, nullable = false, columnDefinition = "char")
+    @Column(nullable = false, columnDefinition = "char(16)")
     var accountId: String = accountId
         protected set
 
-    @Column(length = 64, nullable = false, columnDefinition = "char")
+    @Column(nullable = false, columnDefinition = "char(64)")
     var password: String = password
         protected set
 

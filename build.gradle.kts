@@ -15,12 +15,13 @@ group = "com.mojh"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
+// kotest 5.2.1에서 kotlin-coroutines 1.6.0 필요, 버전 직접 명시안하면 1.5.2 버전으로 적용
+extra["kotlin-coroutines.version"] = "1.6.0"
+
 repositories {
     mavenCentral()
 }
 
-val KOTEST_VERSION = "5.2.1"
-val JJWT_Version = "0.11.2"
 
 dependencies {
     // web
@@ -34,9 +35,10 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
 
     // jjwt
-    implementation("io.jsonwebtoken:jjwt-api:$JJWT_Version")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:$JJWT_Version")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$JJWT_Version")
+    val JJWT_Version = "0.11.2"
+    implementation("io.jsonwebtoken:jjwt-api:${JJWT_Version}")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${JJWT_Version}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${JJWT_Version}")
 
     // kotlin
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -48,12 +50,6 @@ dependencies {
 
     // redis
     implementation ("org.springframework.boot:spring-boot-starter-data-redis")
-
-    // embedded-redis
-    implementation ("it.ozimov:embedded-redis:0.7.2")
-
-    // h2
-    implementation("com.h2database:h2")
 
     // log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
@@ -69,10 +65,16 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:3.0.1")
 
     // kotest
-    testImplementation("io.kotest:kotest-runner-junit5:$KOTEST_VERSION") // for kotest framework
-    testImplementation("io.kotest:kotest-assertions-core:$KOTEST_VERSION") // for kotest core jvm assertions
-    testImplementation("io.kotest:kotest-property:$KOTEST_VERSION") // for kotest property test
+    val KOTEST_VERSION = "5.2.1"
+    testImplementation("io.kotest:kotest-runner-junit5:${KOTEST_VERSION}") // for kotest framework
+    testImplementation("io.kotest:kotest-assertions-core:${KOTEST_VERSION}") // for kotest core jvm assertions
+    testImplementation("io.kotest:kotest-property:${KOTEST_VERSION}") // for kotest property test
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0") // spring extensions
+
+    // testcontainer
+    testImplementation("org.testcontainers:testcontainers")
+    // 1.3.3까지 최소 java 8, 1.3.4 부터 최소 java 11
+    testImplementation("io.kotest.extensions:kotest-extensions-testcontainers:1.3.3");
 }
 
 tasks.withType<KotlinCompile> {
@@ -98,8 +100,6 @@ configurations {
 }
 
 extra["snippetsDir"] = file("build/generated-snippets")
-
-extra["kotlin-coroutines.version"] = "1.6.0"
 
 tasks.test {
     project.property("snippetsDir")?.let { outputs.dir(it) }

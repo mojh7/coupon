@@ -1,6 +1,6 @@
 package com.mojh.cms.member.service
 
-import com.mojh.cms.common.UnitTest
+import com.mojh.cms.common.annotation.UnitTest
 import com.mojh.cms.common.exception.CouponApplicationException
 import com.mojh.cms.common.exception.ErrorCode
 import com.mojh.cms.member.dto.request.SignupMemberRequest
