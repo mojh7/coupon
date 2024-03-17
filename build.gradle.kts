@@ -51,12 +51,6 @@ dependencies {
     // redis
     implementation ("org.springframework.boot:spring-boot-starter-data-redis")
 
-    // embedded-redis
-    implementation ("it.ozimov:embedded-redis:0.7.2")
-
-    // h2
-    implementation("com.h2database:h2")
-
     // log4j2
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // log4j2.yml 적용시 필요
@@ -72,10 +66,15 @@ dependencies {
 
     // kotest
     val KOTEST_VERSION = "5.2.1"
-    testImplementation("io.kotest:kotest-runner-junit5:$KOTEST_VERSION") // for kotest framework
-    testImplementation("io.kotest:kotest-assertions-core:$KOTEST_VERSION") // for kotest core jvm assertions
-    testImplementation("io.kotest:kotest-property:$KOTEST_VERSION") // for kotest property test
+    testImplementation("io.kotest:kotest-runner-junit5:${KOTEST_VERSION}") // for kotest framework
+    testImplementation("io.kotest:kotest-assertions-core:${KOTEST_VERSION}") // for kotest core jvm assertions
+    testImplementation("io.kotest:kotest-property:${KOTEST_VERSION}") // for kotest property test
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0") // spring extensions
+
+    // testcontainer
+    testImplementation("org.testcontainers:testcontainers")
+    // 1.3.3까지 최소 java 8, 1.3.4 부터 최소 java 11
+    testImplementation("io.kotest.extensions:kotest-extensions-testcontainers:1.3.3");
 }
 
 tasks.withType<KotlinCompile> {
