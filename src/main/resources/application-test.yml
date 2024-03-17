@@ -30,7 +30,7 @@ spring:
 jwt:
   access:
     secret-key: 'jwttokenlocaltestsecretkey1q2w3e4r!Useasecretkeyofatleast64bytes'
-    token-valid-time: 90000 # 테스트용으로 30분
+    token-valid-time: 900000
   refresh:
     secret-key: 'jwttokenlocaltestsecretkey1q2w3e4r!Useasecretkeyofatleast64bytesRT'
-    token-valid-time: 150000 # 테스트용으로 40분
+    token-valid-time: 1500000
