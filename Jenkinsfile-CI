@@ -6,7 +6,7 @@ pipeline {
         stage('build') {
             steps {
                 sh 'chmod +x gradlew'
-                sh 'chmod +x ./src/test/resources/compose-test.yml'
+                sh 'chmod +rw ./src/test/resources/compose-test.yml'
                 sh './gradlew clean build --exclude-task test --exclude-task asciidoctor'
                 echo 'build success'
             }
